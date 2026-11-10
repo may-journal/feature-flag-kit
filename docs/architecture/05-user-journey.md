@@ -35,7 +35,7 @@ flowchart TB
     user((3 User)):::persona
     toggle(4 Turn the flag on in Settings<br/>Req 0001):::action
     tester((5 Tester)):::persona
-    launch(6 Launch with an override<br/>Req 0002):::action
+    launch(6 Launch with an override<br/>Req 0002 Req 0007):::action
     resolve[(7 Store resolves the flag<br/>Req 0001 Req 0002)]:::system
     feature[8 Feature shows or hides<br/>Req 0001 Req 0002]:::screen
     expiry[(9 Expiry test names stale flags<br/>Req 0003)]:::system
@@ -69,7 +69,7 @@ Numbers match the callout table.
 | 3   | The person using the app. | Persona | Same person as the system context. |
 | 4   | Flips the flag's toggle. | Action | The user's choice is saved. |
 | 5   | The person testing the app. | Persona | Same person as the system context. |
-| 6   | Passes a launch argument or environment variable. | Action | A run forces a flag without a rebuild. |
+| 6   | Passes a launch argument or environment variable, by hand or from `FlagLaunch`. | Action | A run forces a flag without a rebuild. |
 | 7   | Takes the launch argument, then environment, toggle and default. | System | Precedence lives in one place. |
 | 8   | The flagged feature appears only when the flag is on. | Screen | What the user came to see. |
 | 9   | Lists the flags past their expiry day. | System | The app's test fails until they go. |

@@ -2,6 +2,8 @@
 
 The `FeatureFlagKit` target lives under `Sources/FeatureFlagKit/`. It imports Foundation only, so an app can ship it. The `FeatureFlagKitUI` target, classes 13 to 19, lives under `Sources/FeatureFlagKitUI/`. It imports the core and SwiftUI only.
 
+The `FeatureFlagKitTesting` target, classes 20 to 22, lives under `Sources/FeatureFlagKitTesting/`. It imports the core and XCTest only.
+
 ```mermaid
 classDiagram
     class Flag["1 Flag"]
@@ -24,6 +26,9 @@ classDiagram
     class FlagDebugRow["17 FlagDebugRow"]
     class DebuggableFlag["18 DebuggableFlag"]
     class WatchedFlagStore["19 WatchedFlagStore"]
+    class FlagOverride["20 FlagOverride"]
+    class FlagLaunch["21 FlagLaunch"]
+    class FlagLaunching["22 FlagLaunching"]
 
     Flag ..|> AnyFlag : A
     Flag --> FlagExpiry : B
@@ -66,6 +71,12 @@ classDiagram
     FlagDebugRow --> AnyFlag : MM
     WatchedFlagStore --> flagStore : NN
     WatchedFlagStore --> FlagStore : OO
+    FlagOverride --> Flag : PP
+    FlagOverride --> FlagValue : TT
+    FlagLaunch --> FlagOverride : QQ
+    FlagLaunch --> FlagEncoding : RR
+    FlagLaunching --> FlagLaunch : SS
+    FlagLaunching --> FlagOverride : UU
 
     style Flag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style AnyFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -86,6 +97,9 @@ classDiagram
     style FlagDebugRow fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style DebuggableFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style WatchedFlagStore fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style FlagOverride fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style FlagLaunch fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style FlagLaunching fill:#6d28d9,stroke:#4c1d95,color:#ffffff
 ```
 
 ```mermaid
@@ -127,6 +141,9 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 17  | [`FlagDebugRow`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) shows a flag's value, layer and expiry day, and its toggle or number field. | An override disables the control and says why. |
 | 18  | [`DebuggableFlag`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) reads any `Flag` without its value type. | A catalog holds flags of mixed types. |
 | 19  | [`WatchedFlagStore`](../../Sources/FeatureFlagKitUI/FlagWatcher.swift) is the environment's store, watched from `update()`. | No view starts a listener while it draws. |
+| 20  | [`FlagOverride`](../../Sources/FeatureFlagKitTesting/FlagLaunch.swift) is one flag forced to one value, as launch text. | A test names the flag, not its spelling. |
+| 21  | [`FlagLaunch`](../../Sources/FeatureFlagKitTesting/FlagLaunch.swift) turns overrides into launch arguments or environment. | A test appends them to its launch. |
+| 22  | [`FlagLaunching`](../../Sources/FeatureFlagKitTesting/XCUIApplication+Flags.swift) is an app a UI test launches; `XCUIApplication` conforms. | `overrideFlags` keeps the arguments already set. |
 | A   | `Flag` conforms to `AnyFlag`. | The catalog holds any flag. |
 | B   | `Flag` carries its expiry day. | Expiry is part of the definition. |
 | C   | `Flag` asks `FlagEncoding` for its default settings key. | One encoding for all keys. |
@@ -168,6 +185,12 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | MM  | `FlagDebugRow` shows any flag's title and expiry day. | A flag of the app's own type still shows. |
 | NN  | `WatchedFlagStore` reads the environment's store. | One place reads it and watches it. |
 | OO  | `WatchedFlagStore` hands its view the store. | The view reads flags through it. |
+| PP  | `FlagOverride` takes a flag's name and a value of its type. | The value parses back to the flag's type. |
+| QQ  | `FlagLaunch` reads a list of overrides. | One launch forces several flags. |
+| RR  | `FlagLaunch` spells each through `FlagEncoding`. | The store reads what the test wrote. |
+| SS  | `FlagLaunching` appends `FlagLaunch` arguments. | A UI test adds overrides in one line. |
+| TT  | `FlagOverride` writes a value as launch text. | Any `FlagValue` with a description can be forced. |
+| UU  | `overrideFlags` takes overrides. | The UI test names flags, not their spelling. |
 
 ## Platforms
 
@@ -175,4 +198,4 @@ iOS 26 and macOS 26 and later, built with Swift tools 6.2 in the Swift 6 languag
 
 ## Tests
 
-`swift test` runs every requirement test on the Mac. Each test owns one acceptance in [docs/requirements](../requirements/) and renders an example screen, or the debug screen, with [apple-ui-testing-library](https://github.com/may-journal/apple-ui-testing-library).
+`swift test` runs every requirement test on the Mac. The 0007 tests stand in a small app for `XCUIApplication`, which runs only in a UI test bundle. Each test owns one acceptance in [docs/requirements](../requirements/) and renders an example screen, or the debug screen, with [apple-ui-testing-library](https://github.com/may-journal/apple-ui-testing-library).

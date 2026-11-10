@@ -2,7 +2,7 @@
 
 Typed feature flags for Swift apps on iOS and macOS. Define each flag once and let the user turn it on in Settings. Tests force it from a launch argument or environment variable. See [Platforms](docs/architecture/04-code.md#platforms) for supported versions.
 
-Each app keeps its own flag list. The kit supplies only the machinery.
+Each app keeps its own flag list. The kit supplies only the machinery: the `FeatureFlagKit` core, and `FeatureFlagKitUI` for SwiftUI.
 
 ## Define flags
 
@@ -42,6 +42,47 @@ A toggle set to the default, or to nil, removes its key, so it follows a later r
 1. The compiled default.
 
 `FlagEncoding` spells each name. Bool flags read `YES`, `NO`, `true`, `false`, `1` and `0`.
+
+## Use in SwiftUI
+
+Add the `FeatureFlagKitUI` product to the app target. `@FlagState` reads one `Flag` in a view:
+
+```swift
+import FeatureFlagKit
+import FeatureFlagKitUI
+import SwiftUI
+
+struct MemoriesView: View {
+    @FlagState(AppFlags.onThisDay) private var onThisDay
+
+    var body: some View {
+        if onThisDay { OnThisDayRow() }
+        Toggle("On This Day", isOn: $onThisDay)   // writes the user's toggle
+    }
+}
+```
+
+`@FlagState` reads the environment's `flagStore`, which defaults to `FlagStore.live()`. The view redraws when the flag's toggle changes, from any store over the same settings. Set `.environment(\.flagStore, .isolated())` to give a preview or test its own store.
+
+## Debug screen
+
+`FlagDebugView(catalog:)` lists every flag in the catalog. Each row shows the title, value, the layer that set it and the expiry day.
+
+A `Bool` flag gets a toggle for the user's layer. The toggle is disabled, with the reason, while a launch argument or environment variable sets the flag. "Reset all" clears every toggle in the catalog.
+
+The app decides how to open it. A hidden gesture stays in the app:
+
+```swift
+@State private var showsFlags = false
+
+var body: some View {
+    content
+        .onLongPressGesture(minimumDuration: 3) { showsFlags = true }
+        .sheet(isPresented: $showsFlags) {
+            NavigationStack { FlagDebugView(catalog: AppFlags.catalog) }
+        }
+}
+```
 
 ## Test
 

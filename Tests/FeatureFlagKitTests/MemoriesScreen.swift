@@ -8,6 +8,14 @@ enum ExampleFlags {
     static let onThisDay = Flag(
         "onThisDay", default: false, title: "On This Day",
         expires: FlagExpiry(year: 2099, month: 1, day: 1), legacySettingsKey: "beta.onThisDay")
+
+    /// A flag that holds a number, so the debug screen shows a value with no toggle.
+    static let gridColumns = Flag(
+        "gridColumns", default: 3, title: "Grid columns",
+        expires: FlagExpiry(year: 2098, month: 6, day: 30))
+
+    /// The example app's whole list, as its debug screen walks it.
+    static let catalog = FlagCatalog([onThisDay, gridColumns])
 }
 
 /// An example app screen that shows its On This Day row only when the flag is on.

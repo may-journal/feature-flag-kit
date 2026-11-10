@@ -1,0 +1,17 @@
+# may-journal/.github holds the source copy, and org-settings opens a PR
+# wherever a repo's copy differs, so edit it there. Org required workflows
+# skip issue events, so each repo carries this caller to check its issues.
+
+# The check judges every issue against its template, plans included, and
+# notes when a new issue resembles an older one.
+name: Issue check
+on:
+  issues:
+    types: [opened, edited, reopened, labeled]
+  workflow_dispatch:
+jobs:
+  issue-check:
+    uses: may-journal/fitness-runner/.github/workflows/issue-check-reusable.yml@v1
+    permissions:
+      contents: read
+      issues: write

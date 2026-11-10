@@ -1,0 +1,31 @@
+# may-journal/.github holds the source copy in templates/release and syncs it
+# to each repo that opts in, so edit it there. The release logic lives in
+# public fitness-runner, which every repo can call.
+
+# Release Please keeps a release PR open from conventional commits on main,
+# reading this repo's own config, manifest and version.txt.
+name: Release Please
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# The called workflow's own group differs, since sharing one deadlocks.
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # The called approve job reads the release PR and its checks with the run
+    # token, so this job grants what it needs.
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
+      statuses: read
+    uses: may-journal/fitness-runner/.github/workflows/release-please-reusable.yml@v1
+    secrets: inherit

@@ -95,16 +95,6 @@ xcodegen generate --spec Examples/FlagDebugDemo/project.yml
 open Examples/FlagDebugDemo/FlagDebugDemo.xcodeproj
 ```
 
-| Story | Light | Dark |
-| --- | --- | --- |
-| The default catalog | ![The catalog, light](docs/images/flag-debug-catalog-light.png) | ![The catalog, dark](docs/images/flag-debug-catalog-dark.png) |
-| On This Day forced by `-flag.onThisDay YES`, its row locked | ![A forced flag, light](docs/images/flag-debug-forced-light.png) | ![A forced flag, dark](docs/images/flag-debug-forced-dark.png) |
-| Replay turned on by the user | ![A user's toggle, light](docs/images/flag-debug-toggled-light.png) | ![A user's toggle, dark](docs/images/flag-debug-toggled-dark.png) |
-| Grid columns edited from 3 to 5 | ![A number edited, light](docs/images/flag-debug-number-light.png) | ![A number edited, dark](docs/images/flag-debug-number-dark.png) |
-| The "Reset all" confirmation | ![The confirmation, light](docs/images/flag-debug-reset-light.png) | ![The confirmation, dark](docs/images/flag-debug-reset-dark.png) |
-
-`make screenshots` takes these pictures again from the storybook, at 2x, on a simulator it makes and deletes.
-
 ## Test
 
 Give each test a fresh store, with toggles held in memory. Pass arguments or environment to force a flag:

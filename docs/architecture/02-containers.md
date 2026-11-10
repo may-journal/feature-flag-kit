@@ -51,4 +51,4 @@ Numbers on nodes and letters on arrows match the callout table.
 | 5   | The example iOS app that shows the debug screen and its storybook. | It is the one place StorybookKit is linked. |
 | A   | The developer builds and runs the app. | The kit is a dependency, not a tool. |
 | B   | The app's linked library reads and writes toggles. | Toggles outlive a launch. |
-| C   | The developer runs the demo, or `make screenshots` does. | The README's pictures come from it. |
+| C   | The developer runs the demo. | The storybook shows the screens. |

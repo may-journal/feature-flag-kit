@@ -83,4 +83,4 @@ Numbers on nodes and letters on arrows match the callout table.
 | F   | Reads flags in views and opens the debug screen. | The app picks the gesture that opens it. |
 | G   | Resolves, sets and resets flags, and hears their changes. | Views redraw when a toggle changes. |
 | H   | Reads each flag's definition and the catalog. | The debug screen walks the app's list. |
-| I   | Lists the previews FeatureFlagKitUI declares. | The pictures in the README come from here. |
+| I   | Lists the previews FeatureFlagKitUI declares. | The storybook shows these previews. |

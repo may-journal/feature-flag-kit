@@ -41,5 +41,25 @@ extension FeatureFlagKitTests {
             try await user.doesNotSee(.text("On This Day"))
             try screen.close()
         }
+
+        @Test func test0001_5() async throws {
+            let store = FlagStore.isolated()
+            let screen = try Screen.render { LiveMemoriesScreen(store: store) }
+            let user = User(screen)
+            try await user.sees(.text("Memories"))
+            store.set(true, for: ExampleFlags.onThisDay)
+            try await user.sees(.text("On This Day"))
+            try screen.close()
+        }
+
+        @Test func test0001_6() {
+            let store = FlagStore.isolated()
+            store.set(true, for: ExampleFlags.onThisDay)
+            store.set(false, for: ExampleFlags.onThisDay)
+            let nextRelease = Flag(
+                "onThisDay", default: true, title: "On This Day",
+                expires: ExampleFlags.onThisDay.expires, legacySettingsKey: "beta.onThisDay")
+            #expect(store[nextRelease])
+        }
     }
 }

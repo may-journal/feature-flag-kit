@@ -30,3 +30,11 @@ flag reads with no override
   - Given Developer turned a flag on in one test's fresh store
     - When the next test takes a fresh store
       - Then the flag reads its default
+- 0001.5
+  - Given Developer shows a screen that watches the flag
+    - When User flips the toggle
+      - Then the screen updates
+- 0001.6
+  - Given User set the flag back to its default
+    - When a later release changes the default
+      - Then the flag reads the new default

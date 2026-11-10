@@ -7,6 +7,7 @@ public struct FlagStore: Sendable {
     public let sources: [any FlagSource]
     /// Where `set(_:for:)` writes the user's toggle.
     public let settings: any FlagSettings
+    private let signal = FlagChangeSignal()
 
     public init(sources: [any FlagSource], settings: any FlagSettings) {
         self.sources = sources
@@ -54,13 +55,26 @@ public struct FlagStore: Sendable {
         resolve(flag).value
     }
 
-    /// Saves the user's toggle. A launch argument or environment variable still wins.
-    public func set<Value: FlagValue>(_ value: Value, for flag: Flag<Value>) {
-        settings.set(value.stored, forKey: flag.settingsKey)
+    /// Saves the user's toggle, which an override still beats. The default or nil
+    /// removes the key, so the flag follows a later release's default.
+    public func set<Value: FlagValue>(_ value: Value?, for flag: Flag<Value>) {
+        if let value, value != flag.defaultValue {
+            settings.set(value.stored, forKey: flag.settingsKey)
+        } else {
+            settings.removeObject(forKey: flag.settingsKey)
+        }
+        signal.send(flag.name)
     }
 
     /// Forgets the user's toggle, so the flag falls back to its default.
     public func reset(_ flag: some AnyFlag) {
         settings.removeObject(forKey: flag.settingsKey)
+        signal.send(flag.name)
+    }
+
+    /// The names of flags whose toggle this store changes, from now on.
+    /// Copies of a store share one signal.
+    public func changes() -> AsyncStream<String> {
+        signal.stream()
     }
 }

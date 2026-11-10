@@ -15,6 +15,7 @@ classDiagram
     class FlagSettings["9 FlagSettings"]
     class FlagOrigin["10 FlagOrigin"]
     class FlagResolution["11 FlagResolution"]
+    class InMemoryFlagSettings["12 InMemoryFlagSettings"]
 
     Flag ..|> AnyFlag : A
     Flag --> FlagExpiry : B
@@ -33,6 +34,8 @@ classDiagram
     FlagSource --> Flag : O
     FlagSource --> FlagValue : P
     FlagResolution --> FlagOrigin : Q
+    InMemoryFlagSettings ..|> FlagSettings : R
+    FlagStore --> InMemoryFlagSettings : S
 
     style Flag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style AnyFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -45,6 +48,7 @@ classDiagram
     style FlagSettings fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagOrigin fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagResolution fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style InMemoryFlagSettings fill:#6d28d9,stroke:#4c1d95,color:#ffffff
 ```
 
 ```mermaid
@@ -73,11 +77,12 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 4   | [`FlagExpiry`](../../Sources/FeatureFlagKit/Definitions/FlagExpiry.swift) is the day a flag should be gone, from its start in UTC. | Every machine agrees on the day. |
 | 5   | [`FlagCatalog`](../../Sources/FeatureFlagKit/Definitions/FlagCatalog.swift) is the app's list of flags, with `expired(asOf:)`. | An app test fails once a flag outstays its day. |
 | 6   | [`FlagEncoding`](../../Sources/FeatureFlagKit/Definitions/FlagEncoding.swift) spells `-flag.<name>`, `FLAG_<NAME>` and `flag.<name>`. | Every target reads one encoding. |
-| 7   | [`FlagStore`](../../Sources/FeatureFlagKit/Store/FlagStore.swift) resolves a flag through its sources, then the compiled default. | Precedence lives in one place. |
+| 7   | [`FlagStore`](../../Sources/FeatureFlagKit/Store/FlagStore.swift) resolves a flag through its sources, then the default, and streams toggle changes. | Precedence lives in one place. |
 | 8   | [`FlagSource`](../../Sources/FeatureFlagKit/Store/FlagSource.swift) is one place a value comes from: launch arguments, environment or settings. | A later source can join without changing the store. |
-| 9   | [`FlagSettings`](../../Sources/FeatureFlagKit/Store/FlagSettings.swift) is `UserDefaults` in the app and memory in a test. | Each test starts fresh with nothing to wipe. |
+| 9   | [`FlagSettings`](../../Sources/FeatureFlagKit/Store/FlagSettings.swift) is the small key-value protocol that `UserDefaults` conforms to. | A test swaps memory in for the app's settings. |
 | 10  | [`FlagOrigin`](../../Sources/FeatureFlagKit/Store/FlagOrigin.swift) names where a value came from. | A debug screen can say why a flag is on. |
 | 11  | [`FlagResolution`](../../Sources/FeatureFlagKit/Store/FlagOrigin.swift) pairs a value with its origin. | The value and its origin travel together. |
+| 12  | [`InMemoryFlagSettings`](../../Sources/FeatureFlagKit/Store/FlagSettings.swift) keeps toggles in memory. | A test gets fresh toggles with nothing to wipe. |
 | A   | `Flag` conforms to `AnyFlag`. | The catalog holds any flag. |
 | B   | `Flag` carries its expiry day. | Expiry is part of the definition. |
 | C   | `Flag` asks `FlagEncoding` for its default settings key. | One encoding for all keys. |
@@ -95,6 +100,8 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | O   | `FlagSource` reads one flag. | Each source looks up by the flag's name. |
 | P   | `FlagSource` parses text or stored values. | Each source returns the flag's own type. |
 | Q   | `FlagResolution` holds the origin. | Callers read where it came from. |
+| R   | `InMemoryFlagSettings` conforms to `FlagSettings`. | Tests swap it in for `UserDefaults`. |
+| S   | `FlagStore.isolated()` builds a store on `InMemoryFlagSettings`. | Each test starts from the defaults. |
 
 ## Platforms
 

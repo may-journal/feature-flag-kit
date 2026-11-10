@@ -22,3 +22,24 @@ struct MemoriesScreen: View {
         }
     }
 }
+
+/// The same screen, redrawn whenever the store says a toggle changed.
+struct LiveMemoriesScreen: View {
+    let store: FlagStore
+    @State private var showsOnThisDay = false
+
+    var body: some View {
+        VStack {
+            Text("Memories")
+            if showsOnThisDay {
+                Text("On This Day")
+            }
+        }
+        .task {
+            showsOnThisDay = store[ExampleFlags.onThisDay]
+            for await _ in store.changes() {
+                showsOnThisDay = store[ExampleFlags.onThisDay]
+            }
+        }
+    }
+}

@@ -19,10 +19,14 @@ views that read a flag with `@FlagState`
     - When a view reads the flag with `@FlagState`
       - Then the flagged feature shows
 - 0004.2
-  - Given Developer shows a view that reads the flag with `@FlagState`
+  - Given Developer shows a view that reads the flag with `@FlagState`, and sets no store
     - When User flips the toggle elsewhere
       - Then the view updates
 - 0004.3
   - Given Developer binds a Settings toggle to the flag's `$binding`
     - When User turns it on
       - Then the flag reads on, from the user's toggle
+- 0004.4
+  - Given Tester launches with the flag's launch argument on
+    - When User opens the Settings toggle bound to `$binding`
+      - Then the toggle shows the user's own choice, off

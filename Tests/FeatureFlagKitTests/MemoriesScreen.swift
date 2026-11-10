@@ -18,6 +18,14 @@ enum ExampleFlags {
     static let catalog = FlagCatalog([onThisDay, gridColumns])
 }
 
+/// A flag of the app's own type rather than a `Flag`, which no store can resolve.
+struct CustomFlag: AnyFlag {
+    let name = "legacyBanner"
+    let title = "Legacy banner"
+    let expires = FlagExpiry(year: 2097, month: 3, day: 1)
+    let settingsKey = "flag.legacyBanner"
+}
+
 /// An example app screen that shows its On This Day row only when the flag is on.
 struct MemoriesScreen: View {
     let store: FlagStore

@@ -62,6 +62,8 @@ classDiagram
     Flag ..|> DebuggableFlag : JJ
     Flag --> FlagStore : KK
     Flag --> FlagOrigin : LL
+    FlagDebugRow --> AnyFlag : MM
+    FlagDebugView --> AnyFlag : NN
 
     style Flag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style AnyFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -159,6 +161,8 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | JJ  | [`Flag` conforms to `DebuggableFlag`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift). | Every flag shows without a cast per type. |
 | KK  | [`Flag` resolves itself for the debug screen](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift). | The row needs no value type. |
 | LL  | [`Flag` returns its layer to the debug screen](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift). | The row names where the value came from. |
+| MM  | `FlagDebugRow` shows any flag's title and expiry day. | A flag of the app's own type still shows. |
+| NN  | `FlagDebugView` lists every flag in the catalog. | No flag is left off the screen. |
 
 ## Platforms
 

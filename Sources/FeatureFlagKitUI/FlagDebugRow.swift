@@ -18,11 +18,7 @@ extension Flag: DebuggableFlag {
     func userToggle(in store: FlagStore) -> Binding<Bool>? {
         guard let flag = self as? Flag<Bool> else { return nil }
         return Binding(
-            get: {
-                // The user's own layer: their toggle, or the default when they set none.
-                store.settings.object(forKey: flag.settingsKey).flatMap(Bool.init(stored:))
-                    ?? flag.defaultValue
-            },
+            get: { store.userValue(for: flag) },
             set: { store.set($0, for: flag) }
         )
     }
@@ -30,6 +26,9 @@ extension Flag: DebuggableFlag {
 
 /// The words the debug screen shows for a value, a layer and a day.
 enum FlagText {
+    /// What a row says for a flag of the app's own type, which no store can resolve.
+    static let unknown = "Value unknown, not a Flag"
+
     static func value(_ value: some FlagValue) -> String {
         guard let bool = value as? Bool else { return String(describing: value) }
         return bool ? "On" : "Off"
@@ -53,26 +52,27 @@ enum FlagText {
 /// One flag's title, value, layer and expiry day, read by VoiceOver in that order.
 /// A flag that holds a `Bool` also gets a toggle for the user's layer.
 struct FlagDebugRow: View {
-    let flag: any DebuggableFlag
+    let flag: any AnyFlag
     let store: FlagStore
-    /// The value and layer, read by the screen so a change redraws this row.
-    let shown: (value: String, origin: FlagOrigin)
+    /// The value and layer, read by the screen so a change redraws this row. It is nil
+    /// for a flag of the app's own type, which the store cannot resolve.
+    let shown: (value: String, origin: FlagOrigin)?
 
     var body: some View {
         // Any layer other than the user's own or the default sits above the toggle.
-        let overridden = shown.origin != .user && shown.origin != .compiledDefault
+        let overriding = shown.map { $0.origin != .user && $0.origin != .compiledDefault } ?? false
         VStack(alignment: .leading, spacing: 4) {
-            if let toggle = flag.userToggle(in: store) {
+            if let toggle = (flag as? any DebuggableFlag)?.userToggle(in: store) {
                 Toggle(flag.title, isOn: toggle)
-                    .disabled(overridden)
-                    .accessibilityHint(overridden ? FlagText.overridden(by: shown.origin) : "")
+                    .disabled(overriding)
             } else {
                 Text(flag.title)
             }
-            Text("\(shown.value), from \(FlagText.origin(shown.origin))")
+            Text(
+                shown.map { "\($0.value), from \(FlagText.origin($0.origin))" } ?? FlagText.unknown)
             Text(FlagText.expiry(flag.expires))
                 .foregroundStyle(.secondary)
-            if overridden {
+            if overriding, let shown {
                 Text(FlagText.overridden(by: shown.origin))
                     .foregroundStyle(.secondary)
             }

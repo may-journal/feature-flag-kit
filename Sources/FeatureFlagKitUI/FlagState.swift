@@ -1,8 +1,8 @@
 import FeatureFlagKit
 import SwiftUI
 
-/// Reads a flag in a view from the environment's `flagStore`, and redraws the view when
-/// the flag's toggle changes. `$name` is a binding that writes the user's toggle.
+/// Reads a flag in a view from the environment's `flagStore`, redrawing on each toggle change.
+/// `$name` binds the user's own toggle, never an override, so Settings shows what it saved.
 ///
 /// ```swift
 /// @FlagState(AppFlags.onThisDay) private var onThisDay
@@ -24,17 +24,24 @@ public struct FlagState<Value: FlagValue>: @MainActor DynamicProperty {
         return store[definition]
     }
 
-    /// A binding whose writes save the user's toggle, which an override still beats.
+    /// A binding to the user's own toggle, which an override still beats.
     public var projectedValue: Binding<Value> {
         let store = store
         let definition = definition
         return Binding(
-            get: { store[definition] },
+            get: { store.userValue(for: definition) },
             set: { store.set($0, for: definition) }
         )
     }
 
     public func update() {
         watcher.watch(store, name: definition.name)
+    }
+}
+
+extension FlagStore {
+    /// The user's own layer for `flag`: their toggle, or the default when they set none.
+    func userValue<Value: FlagValue>(for flag: Flag<Value>) -> Value {
+        settings.object(forKey: flag.settingsKey).flatMap(Value.init(stored:)) ?? flag.defaultValue
     }
 }

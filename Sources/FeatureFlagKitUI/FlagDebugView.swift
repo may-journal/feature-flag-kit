@@ -16,9 +16,9 @@ public struct FlagDebugView: View {
         let flags = watchedFlags()
         Form {
             Section {
-                ForEach(flags.indices, id: \.self) { index in
-                    let flag = flags[index]
-                    FlagDebugRow(flag: flag, store: store, shown: flag.shown(in: store))
+                ForEach(flags, id: \.settingsKey) { flag in
+                    let shown = (flag as? any DebuggableFlag)?.shown(in: store)
+                    FlagDebugRow(flag: flag, store: store, shown: shown)
                 }
             }
             Section {
@@ -33,9 +33,9 @@ public struct FlagDebugView: View {
     }
 
     /// Returns the catalog's flags, and reads the watcher so any toggle change redraws the screen.
-    private func watchedFlags() -> [any DebuggableFlag] {
+    private func watchedFlags() -> [any AnyFlag] {
         watcher.watch(store)
         _ = watcher.version
-        return catalog.compactMap { $0 as? any DebuggableFlag }
+        return catalog.flags
     }
 }

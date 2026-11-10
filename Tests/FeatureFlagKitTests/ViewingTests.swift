@@ -10,25 +10,24 @@ extension FeatureFlagKitTests {
     @MainActor
     @Suite struct Viewing {
         @Test func test0004_1() async throws {
-            let defaults = UserDefaults.standard
-            defaults.set(true, forKey: ExampleFlags.onThisDay.settingsKey)
-            defer { defaults.removeObject(forKey: ExampleFlags.onThisDay.settingsKey) }
-            let screen = try Screen.render { WrappedMemoriesScreen() }
-            try await User(screen).sees(.text("On This Day"))
-            try screen.close()
+            try await withStandardDefaults {
+                UserDefaults.standard.set(true, forKey: ExampleFlags.onThisDay.settingsKey)
+                let screen = try Screen.render { WrappedMemoriesScreen() }
+                try await User(screen).sees(.text("On This Day"))
+                try screen.close()
+            }
         }
 
         @Test func test0004_2() async throws {
-            let store = FlagStore.isolated()
-            let screen = try Screen.render {
-                WrappedMemoriesScreen().environment(\.flagStore, store)
+            try await withStandardDefaults {
+                let screen = try Screen.render { WrappedMemoriesScreen() }
+                let user = User(screen)
+                try await user.sees(.text("Memories"))
+                try await user.doesNotSee(.text("On This Day"))
+                FlagStore.live().set(true, for: ExampleFlags.onThisDay)
+                try await user.sees(.text("On This Day"))
+                try screen.close()
             }
-            let user = User(screen)
-            try await user.sees(.text("Memories"))
-            try await user.doesNotSee(.text("On This Day"))
-            store.set(true, for: ExampleFlags.onThisDay)
-            try await user.sees(.text("On This Day"))
-            try screen.close()
         }
 
         @Test func test0004_3() async throws {
@@ -42,6 +41,28 @@ extension FeatureFlagKitTests {
             let resolution = store.resolve(ExampleFlags.onThisDay)
             #expect(resolution.value && resolution.origin == .user)
             try screen.close()
+        }
+
+        @Test func test0004_4() async throws {
+            let launched = FlagStore.isolated(
+                arguments: FlagEncoding.arguments(ExampleFlags.onThisDay, true))
+            let screen = try Screen.render {
+                BetaSettingsScreen().environment(\.flagStore, launched)
+            }
+            let user = User(screen)
+            try await user.sees(.text("On This Day"))
+            let toggle = try await user.sees(.role(.toggle, "Show On This Day"))
+            #expect(toggle.value == "0")
+            try screen.close()
+        }
+
+        /// Runs `body` with the flag's key cleared from the standard defaults the live
+        /// store reads, before and after. The serialized parent suite keeps this one at a time.
+        private func withStandardDefaults(_ body: () async throws -> Void) async throws {
+            let key = ExampleFlags.onThisDay.settingsKey
+            UserDefaults.standard.removeObject(forKey: key)
+            defer { UserDefaults.standard.removeObject(forKey: key) }
+            try await body()
         }
     }
 }

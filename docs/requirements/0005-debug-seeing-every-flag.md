@@ -38,3 +38,7 @@ flags in the app's catalog
   - Given User reads the debug screen with VoiceOver
     - When VoiceOver reaches a flag
       - Then it hears the title, value, layer and expiry day in order
+- 0005.7
+  - Given Developer lists a flag of their own type in the catalog
+    - When User opens the debug screen
+      - Then its row shows the title and says the value is unknown

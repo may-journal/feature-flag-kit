@@ -8,10 +8,12 @@ import UITestingLibrary
 extension FeatureFlagKitTests {
     @MainActor
     @Suite struct Debugging {
-        /// Renders the debug screen for the example catalog on `store`.
-        private func render(_ store: FlagStore) throws -> (Screen, User) {
+        /// Renders the debug screen for `catalog`, the example one unless given, on `store`.
+        private func render(_ store: FlagStore, catalog: FlagCatalog = ExampleFlags.catalog)
+            throws -> (Screen, User)
+        {
             let screen = try Screen.render {
-                FlagDebugView(catalog: ExampleFlags.catalog).environment(\.flagStore, store)
+                FlagDebugView(catalog: catalog).environment(\.flagStore, store)
             }
             return (screen, User(screen))
         }
@@ -73,6 +75,14 @@ extension FeatureFlagKitTests {
                 Array(spoken.dropFirst(title + 1).prefix(2)) == [
                     "Off, from default", "Expires 2099-01-01",
                 ])
+            try screen.close()
+        }
+
+        @Test func test0005_7() async throws {
+            let catalog = FlagCatalog([ExampleFlags.onThisDay, CustomFlag()])
+            let (screen, user) = try render(.isolated(), catalog: catalog)
+            try await user.sees(.text("Legacy banner"))
+            try await user.sees(.text("Value unknown, not a Flag"))
             try screen.close()
         }
     }

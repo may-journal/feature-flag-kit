@@ -30,3 +30,11 @@ flag reads with an override
   - Given Tester launches the app with the flag's launch argument
     - When the app asks where the flag's value came from
       - Then it answers the launch argument
+- 0002.5
+  - Given Tester mistypes the launch argument and sets the environment variable off
+    - When the app shows its screen
+      - Then the environment variable decides
+- 0002.6
+  - Given Tester mistypes the environment variable while the user's toggle is on
+    - When the app shows its screen
+      - Then the user's toggle decides

@@ -19,8 +19,10 @@ public struct FlagExpiry: Sendable, Hashable {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .gmt
         let parts = DateComponents(year: year, month: month, day: day)
+        // Compare only the day's fields, since `==` also compares calendar and time zone.
         guard let start = calendar.date(from: parts),
-            calendar.dateComponents([.year, .month, .day], from: start) == parts
+            case let found = calendar.dateComponents([.year, .month, .day], from: start),
+            found.year == year, found.month == month, found.day == day
         else { return true }
         return date >= start
     }

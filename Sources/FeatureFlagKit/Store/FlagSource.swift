@@ -1,9 +1,10 @@
-/// One place a flag's value can come from. A store asks its sources in order
-/// and takes the first value, so a later release can add a source of its own.
+/// One place a flag's value can come from. A store asks its built-in sources
+/// in order and takes the first value, so a debug screen can list them.
 public protocol FlagSource: Sendable {
     /// What a debug screen shows as this source's name.
     var origin: FlagOrigin { get }
-    /// The flag's value from this source, or nil when it sets none.
+    /// The flag's value from this source, or nil when it sets none or its text
+    /// does not parse, so the next source decides.
     func value<Value: FlagValue>(for flag: Flag<Value>) -> Value?
 }
 

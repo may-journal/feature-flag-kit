@@ -37,8 +37,9 @@ struct LiveMemoriesScreen: View {
             }
         }
         .task {
+            let changes = store.changes()
             showsOnThisDay = store[ExampleFlags.onThisDay]
-            for await _ in store.changes() {
+            for await _ in changes {
                 showsOnThisDay = store[ExampleFlags.onThisDay]
             }
         }

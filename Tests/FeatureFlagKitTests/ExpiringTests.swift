@@ -22,4 +22,18 @@ import Testing
         let catalog = FlagCatalog([ExampleFlags.onThisDay, fresh])
         #expect(catalog.expired(asOf: today).isEmpty)
     }
+
+    @Test func test0003_3() throws {
+        var japanese = Calendar(identifier: .japanese)
+        japanese.timeZone = try #require(TimeZone(identifier: "Asia/Tokyo"))
+        // 07:00 on 16 January of the era year 9 (2027) in Tokyo is still 15 January in UTC.
+        let era = japanese.component(.era, from: today)
+        let tokyoMorning = try #require(
+            japanese.date(from: DateComponents(era: era, year: 9, month: 1, day: 16, hour: 7)))
+        let tomorrow = Flag(
+            "mentions", default: false, title: "Mentions",
+            expires: FlagExpiry(year: 2027, month: 1, day: 16))
+        let catalog = FlagCatalog([ExampleFlags.onThisDay, tomorrow])
+        #expect(catalog.expired(asOf: tokyoMorning).isEmpty)
+    }
 }

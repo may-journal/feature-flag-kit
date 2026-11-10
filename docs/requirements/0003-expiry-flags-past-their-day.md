@@ -22,3 +22,7 @@ flags with an expiry day
   - Given Developer lists only flags that expire later
     - When the expiry test runs
       - Then it names none
+- 0003.3
+  - Given Developer in Tokyo on a Japanese calendar lists a flag expiring tomorrow in UTC
+    - When the expiry test runs
+      - Then it names none

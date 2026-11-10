@@ -7,11 +7,12 @@ public struct FlagStore: Sendable {
     public let sources: [any FlagSource]
     /// Where `set(_:for:)` writes the user's toggle.
     public let settings: any FlagSettings
-    private let signal = FlagChangeSignal()
+    private let signal: FlagChangeSignal
 
     init(sources: [any FlagSource], settings: any FlagSettings) {
         self.sources = sources
         self.settings = settings
+        signal = .shared(for: settings)
     }
 
     /// The store an app uses: this process's launch arguments and environment,
@@ -42,6 +43,7 @@ public struct FlagStore: Sendable {
 
     /// The flag's value and the source that supplied it.
     public func resolve<Value: FlagValue>(_ flag: Flag<Value>) -> FlagResolution<Value> {
+        signal.watch(flag)
         for source in sources {
             if let value = source.value(for: flag) {
                 return FlagResolution(value: value, origin: source.origin)
@@ -58,22 +60,24 @@ public struct FlagStore: Sendable {
     /// Saves the user's toggle, which an override still beats. The default or nil
     /// removes the key, so the flag follows a later release's default.
     public func set<Value: FlagValue>(_ value: Value?, for flag: Flag<Value>) {
+        signal.watch(flag)
         if let value, value != flag.defaultValue {
             settings.set(value.stored, forKey: flag.settingsKey)
         } else {
             settings.removeObject(forKey: flag.settingsKey)
         }
-        signal.send(flag.name)
+        signal.check(key: flag.settingsKey)
     }
 
     /// Forgets the user's toggle, so the flag falls back to its default.
     public func reset(_ flag: some AnyFlag) {
+        signal.watch(flag)
         settings.removeObject(forKey: flag.settingsKey)
-        signal.send(flag.name)
+        signal.check(key: flag.settingsKey)
     }
 
-    /// The names of flags whose toggle this store changes, from now on. Copies
-    /// share one signal, so an app keeps one store and passes it around.
+    /// The names of flags read or set through any store over these settings
+    /// whose toggle changes, from now on, including direct `UserDefaults` writes.
     public func changes() -> AsyncStream<String> {
         signal.stream()
     }

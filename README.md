@@ -32,7 +32,7 @@ flags.set(true, for: AppFlags.onThisDay)   // the user's Settings toggle
 flags.reset(AppFlags.onThisDay)            // back to the default
 ```
 
-A toggle set to the default, or to nil, removes its key, so it follows a later release's default. `changes()` streams the name of each flag whose toggle changed. `FlagCatalog` is a collection, so a screen can list every flag and its title.
+A toggle set to the default, or to nil, removes its key, so it follows a later release's default. `changes()` streams the name of each flag whose toggle changed, through any store over the same settings or straight in `UserDefaults`. `FlagCatalog` is a collection, so a screen can list every flag and its title.
 
 `resolve(_:)` returns the value and where it came from. The store asks, in order:
 

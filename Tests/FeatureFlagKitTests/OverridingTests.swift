@@ -37,5 +37,18 @@ extension FeatureFlagKitTests {
             let launched = store(arguments: ["-flag.onThisDay", "YES"])
             #expect(launched.resolve(flag).origin == .launchArgument)
         }
+
+        @Test func test0002_5() async throws {
+            let launched = store(
+                arguments: ["-flag.onThisDay", "Y"], environment: ["FLAG_ON_THIS_DAY": "NO"])
+            try await expectOnThisDay(shown: false, on: launched)
+            #expect(launched.resolve(flag).origin == .environment)
+        }
+
+        @Test func test0002_6() async throws {
+            let launched = store(environment: ["FLAG_ON_THIS_DAY": "2"])
+            try await expectOnThisDay(shown: true, on: launched)
+            #expect(launched.resolve(flag).origin == .user)
+        }
     }
 }

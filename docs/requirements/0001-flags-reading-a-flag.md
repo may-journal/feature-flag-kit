@@ -38,3 +38,11 @@ flag reads with no override
   - Given User set the flag back to its default
     - When a later release changes the default
       - Then the flag reads the new default
+- 0001.7
+  - Given User flips the toggle on a Settings screen with its own store
+    - When another screen watches the flag
+      - Then that screen updates
+- 0001.8
+  - Given Developer writes the toggle straight into the app's settings
+    - When a screen watches the flag
+      - Then the screen updates

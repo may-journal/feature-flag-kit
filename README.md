@@ -41,7 +41,7 @@ A toggle set to the default, or to nil, removes its key, so it follows a later r
 1. The user's setting.
 1. The compiled default.
 
-`FlagEncoding` spells each name. Bool flags read `YES`, `NO`, `true`, `false`, `1` and `0`.
+`FlagEncoding` spells each name. Bool flags read `YES`, `NO`, `true`, `false`, `1` and `0`. A value is written as its `flagText`, its description unless its type sets one that reads back.
 
 ## Use in SwiftUI
 
@@ -102,18 +102,20 @@ The demo signs with the owner's team and bundle ID, so a fork sets its own `DEVE
 Add the `FeatureFlagKitTesting` product to test targets only; it alone imports XCTest. `FlagLaunch` spells overrides through `FlagEncoding`, so a test writes what the store reads. Give each unit test a fresh store, with toggles held in memory, and pass arguments or environment to force a flag:
 
 ```swift
+import FeatureFlagKit
 import FeatureFlagKitTesting
 
 let flags = FlagStore.isolated(arguments: FlagLaunch.arguments(.set(AppFlags.onThisDay, true)))
 let fromEnvironment = FlagStore.isolated(environment: FlagLaunch.environment(.set(AppFlags.onThisDay, true)))
 ```
 
-A launch overwrites its arguments, so append the overrides to the test's own. On `XCUIApplication`, `overrideFlags` keeps what is already set. With [apple-ui-testing-library](https://github.com/may-journal/apple-ui-testing-library), concatenate before the launch, as the second example does:
+A launch overwrites its arguments, so append the overrides to the test's own. On `XCUIApplication`, `overrideFlags` and `overrideFlagsInEnvironment` keep what is already set. With [apple-ui-testing-library](https://github.com/may-journal/apple-ui-testing-library), concatenate before the launch, as the second example does:
 
 ```swift
 let app = XCUIApplication()
 app.launchArguments = ["-uiTesting"]
 app.overrideFlags(.set(AppFlags.onThisDay, true), .set(AppFlags.gridColumns, 4))
+app.overrideFlagsInEnvironment(.set(AppFlags.onThisDay, true))
 app.launch()
 ```
 

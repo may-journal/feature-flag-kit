@@ -8,9 +8,14 @@ public protocol FlagValue: Sendable, Equatable {
     /// The property-list value the user's settings store. A custom type must
     /// return a `String`, number, `Bool`, `Data` or `Date`, as `UserDefaults` requires.
     var stored: Any { get }
+    /// The value as launch-argument or environment text, which `init?(flagText:)`
+    /// reads back. A custom type whose description does not parse back sets its own.
+    var flagText: String { get }
 }
 
 extension FlagValue {
+    public var flagText: String { String(describing: self) }
+
     public init?(stored: Any) {
         if let value = stored as? Self {
             self = value

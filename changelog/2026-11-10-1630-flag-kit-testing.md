@@ -4,5 +4,6 @@
 
 - Feat: the `FeatureFlagKitTesting` product, on the core only, and the one target that imports XCTest.
 - Feat: `FlagLaunch.arguments` and `FlagLaunch.environment` turn `FlagOverride` values into launch arguments and environment.
-- Feat: `overrideFlags` on `XCUIApplication` appends overrides to its launch arguments, keeping those already set.
+- Feat: `overrideFlags` and `overrideFlagsInEnvironment` on `XCUIApplication` add overrides, keeping the arguments and variables already set.
+- Feat: `FlagValue.flagText` writes a value as launch text its type reads back, and `FlagEncoding.environment` spells one variable.
 - Docs: requirement 0007, the README's Test section and the architecture views.

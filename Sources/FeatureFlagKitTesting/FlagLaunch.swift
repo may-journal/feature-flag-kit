@@ -1,50 +1,42 @@
 import FeatureFlagKit
 
-/// One flag forced to one value, the way a test hands it to a launch.
+/// One flag forced to one value, spelled by the core's `FlagEncoding`.
 public struct FlagOverride: Sendable, Equatable {
-    /// The flag's name, as `FlagEncoding` spells it.
-    public let name: String
-    /// The value as launch text, which the flag's type parses back.
-    public let text: String
-
-    /// Forces `flag` to `value`.
-    public init<Value: FlagValue & CustomStringConvertible>(_ flag: Flag<Value>, _ value: Value) {
-        name = flag.name
-        text = value.description
-    }
+    /// The launch arguments that force the flag: `-flag.<name>` and its value.
+    public let arguments: [String]
+    /// The environment variable that forces the flag: `FLAG_<NAME>` and its value.
+    public let environment: [String: String]
 
     /// Forces `flag` to `value`, so a call reads `.set(AppFlags.onThisDay, true)`.
-    public static func set<Value: FlagValue & CustomStringConvertible>(
-        _ flag: Flag<Value>, _ value: Value
-    ) -> FlagOverride {
-        FlagOverride(flag, value)
+    public static func set<Value: FlagValue>(_ flag: Flag<Value>, _ value: Value) -> FlagOverride {
+        FlagOverride(
+            arguments: FlagEncoding.arguments(flag, value),
+            environment: FlagEncoding.environment(flag, value))
     }
 }
 
-/// Turns flag overrides into what a launch carries, through `FlagEncoding`.
+/// Turns flag overrides into what a launch carries.
 public enum FlagLaunch {
-    /// The launch arguments, `-flag.<name> <value>` per override, to append to a launch's own.
+    /// The launch arguments for every override, to append to a launch's own.
     public static func arguments(_ overrides: FlagOverride...) -> [String] {
         arguments(overrides)
     }
 
-    /// The launch arguments, `-flag.<name> <value>` per override, to append to a launch's own.
+    /// The launch arguments for every override, to append to a launch's own.
     public static func arguments(_ overrides: [FlagOverride]) -> [String] {
-        overrides.flatMap { [FlagEncoding.argument(for: $0.name), $0.text] }
+        overrides.flatMap(\.arguments)
     }
 
-    /// The environment, `FLAG_<NAME>` per override, to merge into a launch's own.
+    /// The environment for every override, to merge into a launch's own.
     public static func environment(_ overrides: FlagOverride...) -> [String: String] {
         environment(overrides)
     }
 
-    /// The environment, `FLAG_<NAME>` per override, to merge into a launch's own.
+    /// The environment for every override, to merge into a launch's own.
     /// A later override of the same flag wins, as it does in the arguments.
     public static func environment(_ overrides: [FlagOverride]) -> [String: String] {
-        var environment: [String: String] = [:]
-        for override in overrides {
-            environment[FlagEncoding.environmentVariable(for: override.name)] = override.text
+        overrides.reduce(into: [:]) { environment, override in
+            environment.merge(override.environment) { _, later in later }
         }
-        return environment
     }
 }

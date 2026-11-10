@@ -74,7 +74,7 @@ classDiagram
     FlagOverride --> Flag : PP
     FlagOverride --> FlagValue : TT
     FlagLaunch --> FlagOverride : QQ
-    FlagLaunch --> FlagEncoding : RR
+    FlagOverride --> FlagEncoding : RR
     FlagLaunching --> FlagLaunch : SS
     FlagLaunching --> FlagOverride : UU
 
@@ -141,16 +141,16 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 17  | [`FlagDebugRow`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) shows a flag's value, layer and expiry day, and its toggle or number field. | An override disables the control and says why. |
 | 18  | [`DebuggableFlag`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) reads any `Flag` without its value type. | A catalog holds flags of mixed types. |
 | 19  | [`WatchedFlagStore`](../../Sources/FeatureFlagKitUI/FlagWatcher.swift) is the environment's store, watched from `update()`. | No view starts a listener while it draws. |
-| 20  | [`FlagOverride`](../../Sources/FeatureFlagKitTesting/FlagLaunch.swift) is one flag forced to one value, as launch text. | A test names the flag, not its spelling. |
+| 20  | [`FlagOverride`](../../Sources/FeatureFlagKitTesting/FlagLaunch.swift) is one flag forced to one value, as launch arguments and environment. | A test names the flag, not its spelling. |
 | 21  | [`FlagLaunch`](../../Sources/FeatureFlagKitTesting/FlagLaunch.swift) turns overrides into launch arguments or environment. | A test appends them to its launch. |
-| 22  | [`FlagLaunching`](../../Sources/FeatureFlagKitTesting/XCUIApplication+Flags.swift) is an app a UI test launches; `XCUIApplication` conforms. | `overrideFlags` keeps the arguments already set. |
+| 22  | [`FlagLaunching`](../../Sources/FeatureFlagKitTesting/XCUIApplication+Flags.swift) is an app a UI test launches; `XCUIApplication` conforms. | Its helpers keep the arguments and environment already set. |
 | A   | `Flag` conforms to `AnyFlag`. | The catalog holds any flag. |
 | B   | `Flag` carries its expiry day. | Expiry is part of the definition. |
 | C   | `Flag` asks `FlagEncoding` for its default settings key. | One encoding for all keys. |
 | D   | `AnyFlag` exposes the expiry day. | The catalog reads it without the value type. |
 | E   | `FlagCatalog` lists flags as `AnyFlag`. | One list per app. |
 | F   | `FlagEncoding` builds launch arguments for a flag. | Tests spell overrides one way. |
-| G   | `FlagEncoding` writes a value as launch text. | The text parses back to the value. |
+| G   | `FlagEncoding` writes a value's `flagText` as launch arguments or environment. | The text parses back to the value. |
 | H   | `FlagStore` asks each source in order: launch argument, environment, user. | The first source that sets a flag wins. |
 | I   | `FlagStore` writes the user's toggle to its settings. | Overrides are never written. |
 | J   | `FlagStore` returns a `FlagResolution`. | A caller sees value and origin together. |
@@ -185,11 +185,11 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | MM  | `FlagDebugRow` shows any flag's title and expiry day. | A flag of the app's own type still shows. |
 | NN  | `WatchedFlagStore` reads the environment's store. | One place reads it and watches it. |
 | OO  | `WatchedFlagStore` hands its view the store. | The view reads flags through it. |
-| PP  | `FlagOverride` takes a flag's name and a value of its type. | The value parses back to the flag's type. |
+| PP  | `FlagOverride` takes a flag and a value of its type. | The value parses back to the flag's type. |
 | QQ  | `FlagLaunch` reads a list of overrides. | One launch forces several flags. |
-| RR  | `FlagLaunch` spells each through `FlagEncoding`. | The store reads what the test wrote. |
-| SS  | `FlagLaunching` appends `FlagLaunch` arguments. | A UI test adds overrides in one line. |
-| TT  | `FlagOverride` writes a value as launch text. | Any `FlagValue` with a description can be forced. |
+| RR  | `FlagOverride` spells itself through `FlagEncoding`. | The store reads what the test wrote. |
+| SS  | `FlagLaunching` appends `FlagLaunch` arguments and merges its environment. | A UI test adds overrides in one line. |
+| TT  | `FlagOverride` accepts any `FlagValue`. | `flagText` writes it as text its type reads back. |
 | UU  | `overrideFlags` takes overrides. | The UI test names flags, not their spelling. |
 
 ## Platforms

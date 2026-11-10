@@ -31,6 +31,14 @@ app launches given overrides from a test helper
     - When the test reads the app's launch arguments
       - Then the earlier arguments are still there
 - 0007.5
-  - Given Tester adds a flag override to a UI test app
+  - Given Tester forces a flag on in a UI test app whose arguments turn it off
     - When the app reads its launch arguments
       - Then the forced value wins
+- 0007.6
+  - Given Tester forces a flag of the app's own value type
+    - When the app launches with those arguments
+      - Then the flag holds the forced value
+- 0007.7
+  - Given Tester forces a flag in a UI test app's environment with variables set
+    - When the test reads the app's launch environment
+      - Then the earlier variables are still there

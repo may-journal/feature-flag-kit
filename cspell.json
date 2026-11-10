@@ -1,8 +1,27 @@
 {
   "useGitignore": true,
   "version": "0.2",
+  "flagWords": [
+    "Bottom Line",
+    "MayCalendar",
+    "MayJournals",
+    "MayPhotos",
+    "May Calendar",
+    "May Journals",
+    "May Photos",
+    "Photo Portal",
+    "Secret Gifts",
+    "Totalist"
+  ],
   "words": [
+    "deinit",
+    "fitnessrc",
+    "jasonvanderslice",
+    "swiftlint",
     "swiftpm",
-    "Vanderslice"
+    "Totalist",
+    "uppercased",
+    "Vanderslice",
+    "xcodeproj"
   ]
 }

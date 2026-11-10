@@ -16,7 +16,7 @@ fitness:
 
 # Wrap and indent every Swift file with the toolchain's swift-format, per .swift-format.
 format:
-	swift format format --in-place --recursive --configuration .swift-format Sources Tests Package.swift
+	swift format format --in-place --recursive --configuration .swift-format Sources Tests Examples Package.swift
 
 # Build the package and run every requirement test on the Mac.
 requirements:

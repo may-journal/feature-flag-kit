@@ -8,3 +8,5 @@
 .swiftpm/
 # a library leaves dependency pins to the app that links it
 Package.resolved
+# the example app's project, which XcodeGen makes from project.yml
+Examples/FlagDebugDemo/FlagDebugDemo.xcodeproj/

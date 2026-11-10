@@ -14,14 +14,21 @@
     "Totalist"
   ],
   "words": [
+    "bootstatus",
     "deinit",
     "fitnessrc",
+    "INFOPLIST",
+    "iphonesimulator",
     "jasonvanderslice",
+    "simctl",
     "swiftlint",
     "swiftpm",
     "Totalist",
+    "udid",
     "uppercased",
     "Vanderslice",
-    "xcodeproj"
+    "xcodegen",
+    "xcodeproj",
+    "xcrun"
   ]
 }

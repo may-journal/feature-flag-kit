@@ -1,6 +1,6 @@
 # feature-flag-kit
 
-A Swift package, module `FeatureFlagKit`, that gives an app typed feature flags with user toggles and launch overrides. See [README.md](README.md) for the pitch and [Platforms](docs/architecture/04-code.md#platforms) for versions.
+A Swift package, modules `FeatureFlagKit` and `FeatureFlagKitUI`, that gives an app typed feature flags with user toggles and launch overrides. See [README.md](README.md) for the pitch and [Platforms](docs/architecture/04-code.md#platforms) for versions.
 
 ## Rules
 

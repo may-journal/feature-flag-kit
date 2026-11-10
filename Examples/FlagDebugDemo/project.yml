@@ -2,7 +2,7 @@
 # XcodeGen turns this into FlagDebugDemo.xcodeproj, which git ignores.
 name: FlagDebugDemo
 options:
-  bundleIdPrefix: com.example
+  bundleIdPrefix: com.mayjournal
   deploymentTarget:
     iOS: "26.0"
 packages:
@@ -26,6 +26,7 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         SWIFT_VERSION: "6.0"
-        CODE_SIGNING_ALLOWED: NO
+        # The owner's individual team. Build unsigned with `make demo`, which passes CODE_SIGNING_ALLOWED=NO.
+        DEVELOPMENT_TEAM: AMPJZXR538
         # Keeps every preview in the static FeatureFlagKitUI library linked, for the storybook.
         OTHER_LDFLAGS: $(inherited) -all_load

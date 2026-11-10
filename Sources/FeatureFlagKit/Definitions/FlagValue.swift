@@ -5,7 +5,8 @@ public protocol FlagValue: Sendable, Equatable {
     init?(flagText: String)
     /// Reads a value the user's settings stored, or nil when it has another type.
     init?(stored: Any)
-    /// The property-list value the user's settings store.
+    /// The property-list value the user's settings store. A custom type must
+    /// return a `String`, number, `Bool`, `Data` or `Date`, as `UserDefaults` requires.
     var stored: Any { get }
 }
 
@@ -19,12 +20,12 @@ extension FlagValue {
             return nil
         }
     }
-
-    public var stored: Any { self }
 }
 
 extension Bool: FlagValue {
-    /// Accepts the spellings `UserDefaults` accepts for a Boolean argument.
+    public var stored: Any { self }
+
+    /// Accepts `YES`, `NO`, `true`, `false`, `1` and `0`, in any case.
     public init?(flagText: String) {
         switch flagText.lowercased() {
         case "yes", "true", "1": self = true
@@ -35,18 +36,24 @@ extension Bool: FlagValue {
 }
 
 extension Int: FlagValue {
+    public var stored: Any { self }
+
     public init?(flagText: String) {
         self.init(flagText, radix: 10)
     }
 }
 
 extension Double: FlagValue {
+    public var stored: Any { self }
+
     public init?(flagText: String) {
         self.init(flagText)
     }
 }
 
 extension String: FlagValue {
+    public var stored: Any { self }
+
     public init?(flagText: String) {
         self = flagText
     }

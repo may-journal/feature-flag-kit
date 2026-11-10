@@ -13,12 +13,15 @@ public struct FlagExpiry: Sendable, Hashable {
         self.day = day
     }
 
-    /// Whether `date` falls on or after the expiry day.
+    /// Whether `date` falls on or after the expiry day. A day that does not
+    /// exist, such as 30 February, counts as passed, so the expiry test names it.
     public func isPassed(asOf date: Date) -> Bool {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .gmt
         let parts = DateComponents(year: year, month: month, day: day)
-        guard let start = calendar.date(from: parts) else { return true }
+        guard let start = calendar.date(from: parts),
+            calendar.dateComponents([.year, .month, .day], from: start) == parts
+        else { return true }
         return date >= start
     }
 }

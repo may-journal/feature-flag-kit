@@ -9,7 +9,7 @@ public struct FlagStore: Sendable {
     public let settings: any FlagSettings
     private let signal = FlagChangeSignal()
 
-    public init(sources: [any FlagSource], settings: any FlagSettings) {
+    init(sources: [any FlagSource], settings: any FlagSettings) {
         self.sources = sources
         self.settings = settings
     }
@@ -72,8 +72,8 @@ public struct FlagStore: Sendable {
         signal.send(flag.name)
     }
 
-    /// The names of flags whose toggle this store changes, from now on.
-    /// Copies of a store share one signal.
+    /// The names of flags whose toggle this store changes, from now on. Copies
+    /// share one signal, so an app keeps one store and passes it around.
     public func changes() -> AsyncStream<String> {
         signal.stream()
     }

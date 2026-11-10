@@ -7,19 +7,29 @@ public enum FlagEncoding {
         "-flag.\(name)"
     }
 
-    /// The environment variable that sets a flag: `FLAG_` and the name in
-    /// upper snake case, so `onThisDay` becomes `FLAG_ON_THIS_DAY`.
+    /// The environment variable that sets a flag: `FLAG_` and the camel-case
+    /// name in upper snake case, so `showHTMLView` becomes `FLAG_SHOW_HTML_VIEW`.
     public static func environmentVariable(for name: String) -> String {
+        let characters = Array(name)
         var out = "FLAG_"
-        var previous: Character?
-        for character in name {
-            if character.isUppercase, let previous, previous.isLowercase || previous.isNumber {
+        for (index, character) in characters.enumerated() {
+            if index > 0, startsWord(characters, at: index) {
                 out.append("_")
             }
             out.append(character.isLetter || character.isNumber ? character : "_")
-            previous = character
         }
         return out.uppercased()
+    }
+
+    /// Whether an uppercase letter starts a word. It does after a lowercase letter
+    /// or digit, and as an acronym's last capital before a lowercase letter.
+    private static func startsWord(_ characters: [Character], at index: Int) -> Bool {
+        let character = characters[index]
+        let previous = characters[index - 1]
+        guard character.isUppercase else { return false }
+        if previous.isLowercase || previous.isNumber { return true }
+        let next = index + 1 < characters.count ? characters[index + 1] : nil
+        return previous.isUppercase && next?.isLowercase == true
     }
 
     /// The settings key a flag's toggle lives under when it has no legacy key.

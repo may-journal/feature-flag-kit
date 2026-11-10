@@ -1,5 +1,6 @@
 import FeatureFlagKit
 import SwiftUI
+import UITestingLibrary
 
 /// The flags an example app defines, the way an app keeps its own list.
 enum ExampleFlags {
@@ -42,4 +43,18 @@ struct LiveMemoriesScreen: View {
             }
         }
     }
+}
+
+/// Renders the example screen on `store` and checks whether the On This Day row shows.
+@MainActor
+func expectOnThisDay(shown: Bool, on store: FlagStore) async throws {
+    let screen = try Screen.render { MemoriesScreen(store: store) }
+    let user = User(screen)
+    try await user.sees(.text("Memories"))
+    if shown {
+        try await user.sees(.text("On This Day"))
+    } else {
+        try await user.doesNotSee(.text("On This Day"))
+    }
+    try screen.close()
 }

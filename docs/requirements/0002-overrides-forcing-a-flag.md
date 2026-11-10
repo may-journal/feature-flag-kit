@@ -15,13 +15,13 @@ flag reads with an override
 ## Requirements
 
 - 0002.1
-  - Given Tester launches the app with the flag's launch argument on
+  - Given Tester launches with the launch argument off while the user's toggle is on
     - When the app shows its screen
-      - Then the flagged feature shows over the user's toggle
+      - Then the flagged feature stays hidden
 - 0002.2
-  - Given Tester launches the app with the flag's environment variable on
+  - Given Tester launches with the environment variable off while the user's toggle is on
     - When the app shows its screen
-      - Then the flagged feature shows over the user's toggle
+      - Then the flagged feature stays hidden
 - 0002.3
   - Given Tester sets the launch argument off and the environment variable on
     - When the app shows its screen

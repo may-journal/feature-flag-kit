@@ -26,12 +26,7 @@ public struct FlagState<Value: FlagValue>: @MainActor DynamicProperty {
 
     /// A binding to the user's own toggle, which an override still beats.
     public var projectedValue: Binding<Value> {
-        let store = store
-        let definition = definition
-        return Binding(
-            get: { store.userValue(for: definition) },
-            set: { store.set($0, for: definition) }
-        )
+        store.userBinding(for: definition)
     }
 
     public func update() {

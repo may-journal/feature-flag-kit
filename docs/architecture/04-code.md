@@ -120,8 +120,8 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 13  | [`flagStore`](../../Sources/FeatureFlagKitUI/FlagStoreEnvironment.swift) is the environment's store, `FlagStore.live()` by default. | A preview or test swaps in its own store. |
 | 14  | [`FlagState`](../../Sources/FeatureFlagKitUI/FlagState.swift) is the `@FlagState` property wrapper, with `$binding` for the user's toggle. | A view reads a flag in one line. |
 | 15  | [`FlagWatcher`](../../Sources/FeatureFlagKitUI/FlagWatcher.swift) counts the store's toggle changes. | A view that reads the count redraws on each change. |
-| 16  | [`FlagDebugView`](../../Sources/FeatureFlagKitUI/FlagDebugView.swift) lists the catalog's flags, with "Reset all". | One screen says why each flag is on. |
-| 17  | [`FlagDebugRow`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) shows a flag's value, layer and expiry day, and its toggle. | An override disables the toggle and says why. |
+| 16  | [`FlagDebugView`](../../Sources/FeatureFlagKitUI/FlagDebugView.swift) lists the catalog's flags, with "Reset all" behind a confirmation. | One screen says why each flag is on, and a slip clears nothing. |
+| 17  | [`FlagDebugRow`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) shows a flag's value, layer and expiry day, and its toggle or number field. | An override disables the control and says why. |
 | 18  | [`DebuggableFlag`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) reads any `Flag` without its value type. | A catalog holds flags of mixed types. |
 | A   | `Flag` conforms to `AnyFlag`. | The catalog holds any flag. |
 | B   | `Flag` carries its expiry day. | Expiry is part of the definition. |
@@ -149,12 +149,12 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | X   | `FlagWatcher` keeps one listener per settings object. | A new store over the same settings keeps it. |
 | Y   | `FlagDebugView` reads the environment's store. | It shows the store the app uses. |
 | Z   | `FlagDebugView` redraws on any flag's change. | Every row stays current. |
-| AA  | `FlagDebugView` walks the catalog and resets each flag. | "Reset all" covers the whole list. |
+| AA  | `FlagDebugView` walks the catalog and resets each flag once the user confirms. | "Reset all" covers the whole list. |
 | BB  | `FlagDebugView` passes each row its value and layer. | A changed value redraws the row. |
 | CC  | `FlagDebugView` reads each flag through `DebuggableFlag`. | Flags of any value type show. |
-| DD  | `FlagDebugRow` reads and toggles its flag. | Only `Bool` flags get a toggle. |
-| EE  | `FlagDebugRow` writes the toggle to the store. | The user's layer is the one it sets. |
-| FF  | `FlagDebugRow` names the layer. | An override disables the toggle. |
+| DD  | `FlagDebugRow` reads and changes its flag. | `Bool` flags get a toggle and `Int` flags a number field. |
+| EE  | `FlagDebugRow` writes the user's setting to the store. | The user's layer is the one it sets. |
+| FF  | `FlagDebugRow` names the layer. | An override disables the control. |
 | GG  | `DebuggableFlag` refines `AnyFlag`. | A row still reads the title and expiry day. |
 | HH  | `DebuggableFlag` resolves through the store. | The store's precedence decides. |
 | II  | `DebuggableFlag` returns the layer. | The row says where the value came from. |

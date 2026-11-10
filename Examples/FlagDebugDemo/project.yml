@@ -1,0 +1,31 @@
+# A tiny iOS app, the only one linking StorybookKit, that shows FeatureFlagKitUI's previews.
+# XcodeGen turns this into FlagDebugDemo.xcodeproj, which git ignores.
+name: FlagDebugDemo
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "26.0"
+packages:
+  FeatureFlagKit:
+    path: ../..
+  Storybook:
+    url: https://github.com/eure/swift-storybook
+    from: 3.3.0
+targets:
+  FlagDebugDemo:
+    type: application
+    platform: iOS
+    sources: [FlagDebugDemo]
+    dependencies:
+      - package: FeatureFlagKit
+        product: FeatureFlagKitUI
+      - package: Storybook
+        product: StorybookKit
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        SWIFT_VERSION: "6.0"
+        CODE_SIGNING_ALLOWED: NO
+        # Keeps every preview in the static FeatureFlagKitUI library linked, for the storybook.
+        OTHER_LDFLAGS: $(inherited) -all_load

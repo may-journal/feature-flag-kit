@@ -2,12 +2,14 @@
 # Thresholds are complexity 5, file and type length 200, function body 40, line length 100.
 
 included:
+  - Examples
   - Sources
   - TestHost
   - Tests
 
 excluded:
   - .build
+  - Examples/FlagDebugDemo/.build
 
 cyclomatic_complexity:
   warning: 5

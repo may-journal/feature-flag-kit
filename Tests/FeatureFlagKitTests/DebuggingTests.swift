@@ -27,7 +27,7 @@ extension FeatureFlagKitTests {
             let (screen, user) = try render(.isolated())
             try await user.sees(.role(.toggle, "On This Day"))
             try await user.sees(.text("Expires 2099-01-01"))
-            try await user.sees(.text("Grid columns"))
+            try await user.sees(.role(.textField, "Grid columns"))
             try await user.sees(.text("3, from default"))
             try await user.sees(.text("Expires 2098-06-30"))
             try screen.close()
@@ -42,7 +42,7 @@ extension FeatureFlagKitTests {
         @Test func test0005_3() async throws {
             let (screen, user) = try render(.isolated())
             try await user.taps(.role(.toggle, "On This Day"))
-            try await user.sees(.text("On, from user toggle"))
+            try await user.sees(.text("On, from user setting"))
             try screen.close()
         }
 
@@ -50,7 +50,7 @@ extension FeatureFlagKitTests {
             let (screen, user) = try render(launched)
             let toggle = try await user.sees(.role(.toggle, "On This Day"))
             #expect(!toggle.isEnabled)
-            try await user.sees(.text("Set by the launch argument, which beats this toggle."))
+            try await user.sees(.text("Set by the launch argument, which beats this setting."))
             try screen.close()
         }
 
@@ -59,7 +59,9 @@ extension FeatureFlagKitTests {
             store.set(true, for: ExampleFlags.onThisDay)
             store.set(5, for: ExampleFlags.gridColumns)
             let (screen, user) = try render(store)
-            try await user.sees(.text("5, from user toggle"))
+            try await user.sees(.text("5, from user setting"))
+            try await user.taps(.button("Reset all"))
+            // The confirmation covers the screen, so this "Reset all" is the dialog's own.
             try await user.taps(.button("Reset all"))
             try await user.sees(.text("Off, from default"))
             try await user.sees(.text("3, from default"))
@@ -83,6 +85,16 @@ extension FeatureFlagKitTests {
             let (screen, user) = try render(.isolated(), catalog: catalog)
             try await user.sees(.text("Legacy banner"))
             try await user.sees(.text("Value unknown, not a Flag"))
+            try screen.close()
+        }
+
+        @Test func test0005_8() async throws {
+            let store = FlagStore.isolated(
+                arguments: FlagEncoding.arguments(ExampleFlags.gridColumns, 6))
+            let (screen, user) = try render(store)
+            let field = try await user.sees(.role(.textField, "Grid columns"))
+            #expect(!field.isEnabled)
+            try await user.sees(.text("Set by the launch argument, which beats this setting."))
             try screen.close()
         }
     }

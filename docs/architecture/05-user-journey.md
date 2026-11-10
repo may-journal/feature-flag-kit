@@ -40,7 +40,7 @@ flowchart TB
     feature[8 Feature shows or hides<br/>Req 0001 Req 0002]:::screen
     expiry[(9 Expiry test names stale flags<br/>Req 0003)]:::system
     view[10 View reads the flag with @FlagState<br/>Req 0004]:::screen
-    debug[11 Debug screen lists every flag and its layer<br/>Req 0005]:::screen
+    debug[11 Debug screen lists every flag and its layer<br/>Req 0005 Req 0006]:::screen
 
     developer --> define
     user --> toggle
@@ -74,4 +74,4 @@ Numbers match the callout table.
 | 8   | The flagged feature appears only when the flag is on. | Screen | What the user came to see. |
 | 9   | Lists the flags past their expiry day. | System | The app's test fails until they go. |
 | 10  | The view redraws when the flag's toggle changes. | Screen | A toggle shows at once. |
-| 11  | Shows each flag's value, layer and expiry day, with toggles and "Reset all". | Screen | The user sees why a flag is on. |
+| 11  | Shows each flag's value, layer and expiry day, with toggles, number fields and a confirmed "Reset all". | Screen | The user sees why a flag is on. |

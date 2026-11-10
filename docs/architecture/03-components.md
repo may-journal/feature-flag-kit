@@ -18,6 +18,10 @@ C4Component
         Component(views, "9 Views", "SwiftUI", "Sources/FeatureFlagKitUI")
     }
 
+    Container_Boundary(demo, "10 FlagDebugDemo") {
+        Component(example, "11 Demo app", "SwiftUI", "Examples/FlagDebugDemo/FlagDebugDemo")
+    }
+
     System_Ext(defaults, "6 UserDefaults")
     System_Ext(process, "7 Launch arguments and environment")
 
@@ -29,12 +33,14 @@ C4Component
     Rel(developer, views, "F")
     Rel(views, store, "G")
     Rel(views, definitions, "H")
+    Rel(example, views, "I")
 
     UpdateElementStyle(developer, $bgColor="#334155", $borderColor="#1e293b", $fontColor="#ffffff")
     UpdateElementStyle(definitions, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
     UpdateElementStyle(store, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
     UpdateElementStyle(manifest, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
     UpdateElementStyle(views, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
+    UpdateElementStyle(example, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
     UpdateElementStyle(defaults, $bgColor="#64748b", $borderColor="#475569", $fontColor="#ffffff")
     UpdateElementStyle(process, $bgColor="#64748b", $borderColor="#475569", $fontColor="#ffffff")
 ```
@@ -67,6 +73,8 @@ Numbers on nodes and letters on arrows match the callout table.
 | 7   | Carries the overrides a launch sets. | Tests and manual runs need no rebuild. |
 | 8   | The SwiftUI library. | SwiftUI stays out of the core. |
 | 9   | The `flagStore` environment value, `@FlagState` and `FlagDebugView`. | One place for SwiftUI. |
+| 10  | The example iOS app, which alone links StorybookKit. | Apps that add the kit never inherit the storybook. |
+| 11  | Opens the storybook, or with `--storybook "<story name>"` one story. | Each state is seen without tapping to it. |
 | A   | Defines each flag once. | One typed definition replaces repeated defaults. |
 | B   | Resolves a flag from its definition. | The default is the last resort. |
 | C   | Reads and writes the user's toggles. | Older keys keep working. |
@@ -75,3 +83,4 @@ Numbers on nodes and letters on arrows match the callout table.
 | F   | Reads flags in views and opens the debug screen. | The app picks the gesture that opens it. |
 | G   | Resolves, sets and resets flags, and hears their changes. | Views redraw when a toggle changes. |
 | H   | Reads each flag's definition and the catalog. | The debug screen walks the app's list. |
+| I   | Lists the previews FeatureFlagKitUI declares. | The pictures in the README come from here. |

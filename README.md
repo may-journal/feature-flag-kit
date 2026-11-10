@@ -38,7 +38,7 @@ A toggle set to the default, or to nil, removes its key, so it follows a later r
 
 1. A launch argument, `-flag.onThisDay YES`.
 1. An environment variable, `FLAG_ON_THIS_DAY=YES`.
-1. The user's toggle.
+1. The user's setting.
 1. The compiled default.
 
 `FlagEncoding` spells each name. Bool flags read `YES`, `NO`, `true`, `false`, `1` and `0`.
@@ -68,7 +68,7 @@ struct MemoriesView: View {
 
 `FlagDebugView(catalog:)` lists every flag in the catalog. Each row shows the title, value, the layer that set it and the expiry day.
 
-A `Bool` flag gets a toggle for the user's layer. The toggle is disabled, with the reason, while a launch argument or environment variable sets the flag. "Reset all" clears every toggle in the catalog.
+A `Bool` flag gets a toggle for the user's layer, and an `Int` flag gets a number field. The row names that layer "user setting". Each control is disabled, with the reason, while a launch argument or environment variable sets the flag. "Reset all" asks first, then clears every user setting in the catalog.
 
 The app decides how to open it. A hidden gesture stays in the app:
 
@@ -83,6 +83,27 @@ var body: some View {
         }
 }
 ```
+
+## Storybook
+
+Each state of the debug screen is a `#Preview` in [FlagDebugView+Previews.swift](Sources/FeatureFlagKitUI/FlagDebugView+Previews.swift), in light and dark. The previews compile only in Debug builds. The demo app in [Examples/FlagDebugDemo](Examples/FlagDebugDemo/) lists them in a storybook made with [StorybookKit](https://github.com/eure/swift-storybook). Only the demo app links StorybookKit, so an app that adds this package never inherits it.
+
+To open the storybook, generate the demo's project with XcodeGen and run it; the demo opens on the storybook. To open one story, add `--storybook "FlagDebugView: number edited"` to the scheme's Arguments.
+
+```sh
+xcodegen generate --spec Examples/FlagDebugDemo/project.yml
+open Examples/FlagDebugDemo/FlagDebugDemo.xcodeproj
+```
+
+| Story | Light | Dark |
+| --- | --- | --- |
+| The default catalog | ![The catalog, light](docs/images/flag-debug-catalog-light.png) | ![The catalog, dark](docs/images/flag-debug-catalog-dark.png) |
+| On This Day forced by `-flag.onThisDay YES`, its row locked | ![A forced flag, light](docs/images/flag-debug-forced-light.png) | ![A forced flag, dark](docs/images/flag-debug-forced-dark.png) |
+| Replay turned on by the user | ![A user's toggle, light](docs/images/flag-debug-toggled-light.png) | ![A user's toggle, dark](docs/images/flag-debug-toggled-dark.png) |
+| Grid columns edited from 3 to 5 | ![A number edited, light](docs/images/flag-debug-number-light.png) | ![A number edited, dark](docs/images/flag-debug-number-dark.png) |
+| The "Reset all" confirmation | ![The confirmation, light](docs/images/flag-debug-reset-light.png) | ![The confirmation, dark](docs/images/flag-debug-reset-dark.png) |
+
+`make screenshots` takes these pictures again from the storybook, at 2x, on a simulator it makes and deletes.
 
 ## Test
 

@@ -25,14 +25,14 @@ flags in the app's catalog
 - 0005.3
   - Given User opens the debug screen
     - When User turns a flag's toggle on
-      - Then the row shows it on, from the user's toggle
+      - Then the row shows it on, from the user's setting
 - 0005.4
   - Given Tester launches with the flag's launch argument on
     - When User opens the debug screen
       - Then the toggle is disabled, with the reason beside it
 - 0005.5
   - Given User set two flags away from their defaults
-    - When User taps Reset all
+    - When User confirms Reset all
       - Then every flag shows its default
 - 0005.6
   - Given User reads the debug screen with VoiceOver
@@ -42,3 +42,7 @@ flags in the app's catalog
   - Given Developer lists a flag of their own type in the catalog
     - When User opens the debug screen
       - Then its row shows the title and says the value is unknown
+- 0005.8
+  - Given Tester launches with a number flag's launch argument
+    - When User opens the debug screen
+      - Then the number field is disabled, with the reason beside it

@@ -5,4 +5,4 @@
 - Chore: sync the fitness hooks and the issue and PR templates from may-journal/.github.
 - Chore: sync the workflows and the release configuration from may-journal/.github.
 - Chore: replace the stock Xcode `.gitignore` with the patterns this Swift package needs, each with its reason.
-- Chore: add `swiftpm` and `Vanderslice`, the license holder, to the `cspell.json` spelling words.
+- Chore: create `cspell.json` with `swiftpm` and `Vanderslice`, the license holder, as spelling words.

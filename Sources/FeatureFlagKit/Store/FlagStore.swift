@@ -81,4 +81,14 @@ public struct FlagStore: Sendable {
     public func changes() -> AsyncStream<String> {
         signal.stream()
     }
+
+    /// Equal for stores whose `changes()` hear the same writes, so a listener keeps its stream.
+    package var changesID: ObjectIdentifier {
+        ObjectIdentifier(signal)
+    }
+
+    /// The user's own layer for `flag`: their setting, or the default when they set none.
+    package func userValue<Value: FlagValue>(for flag: Flag<Value>) -> Value {
+        SettingsSource(settings).value(for: flag) ?? flag.defaultValue
+    }
 }

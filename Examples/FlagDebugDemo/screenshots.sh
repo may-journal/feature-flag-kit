@@ -44,12 +44,31 @@ xcrun simctl install "$udid" "$app"
 xcrun simctl status_bar "$udid" override --time 9:41 --batteryState charged --batteryLevel 100
 mkdir -p "$out"
 
+# Saves the screen as `$1` once two captures a second apart match, so the story has drawn.
+# The first capture waits two seconds, past the launch screen, which also holds still.
+settle() {
+    local previous=$1.previous.png
+    sleep 2
+    xcrun simctl io "$udid" screenshot --type=png "$previous" >/dev/null 2>&1
+    for attempt in {1..30}; do
+        sleep 1
+        xcrun simctl io "$udid" screenshot --type=png "$1" >/dev/null 2>&1
+        if cmp -s "$1" "$previous"; then
+            rm -f "$previous"
+            return
+        fi
+        mv "$1" "$previous"
+    done
+    rm -f "$previous"
+    echo "The story never stopped changing on screen: $1" >&2
+    exit 1
+}
+
 # Opens the story `$2` and saves the screen as docs/images/<$1>.png, scaled from 3x to 2x.
 shoot() {
     xcrun simctl launch --terminate-running-process "$udid" $bundle --storybook "$2" >/dev/null
-    sleep 4
     local file=$out/$1.png
-    xcrun simctl io "$udid" screenshot --type=png "$file" >/dev/null
+    settle "$file"
     local width=$(sips -g pixelWidth "$file" | awk '/pixelWidth/ { print $2 }')
     sips --resampleWidth $((width * 2 / 3)) "$file" >/dev/null
 }

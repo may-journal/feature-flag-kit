@@ -5,8 +5,8 @@ import SwiftUI
 /// The app opens it however it likes, such as from a hidden gesture.
 public struct FlagDebugView: View {
     private let catalog: FlagCatalog
-    @Environment(\.flagStore) private var store
-    @State private var watcher = FlagWatcher()
+    /// The environment's store, watched so any flag's change redraws the screen.
+    private var watched = WatchedFlagStore()
     /// Whether "Reset all" is asking to be confirmed.
     @State private var confirmsReset: Bool
 
@@ -22,19 +22,22 @@ public struct FlagDebugView: View {
     }
 
     public var body: some View {
-        let flags = watchedFlags()
+        let store = watched.store
+        // Read each value and layer here, so the list's data changes and it redraws the row.
+        let rows = catalog.flags.map { flag in
+            (flag: flag, shown: (flag as? any DebuggableFlag)?.shown(in: store))
+        }
         Form {
             Section {
-                ForEach(flags, id: \.settingsKey) { flag in
-                    let shown = (flag as? any DebuggableFlag)?.shown(in: store)
-                    FlagDebugRow(flag: flag, store: store, shown: shown)
+                ForEach(rows, id: \.flag.settingsKey) { row in
+                    FlagDebugRow(flag: row.flag, store: store, shown: row.shown)
                 }
             }
             Section {
                 // The confirmation hangs off the button, so it points at what was tapped.
                 Button(Self.resetAll, role: .destructive) { confirmsReset = true }
                     .confirmationDialog(
-                        "Reset every flag to its default?", isPresented: $confirmsReset,
+                        "Clear every user setting?", isPresented: $confirmsReset,
                         titleVisibility: .visible
                     ) {
                         Button(Self.resetAll, role: .destructive) {
@@ -44,7 +47,7 @@ public struct FlagDebugView: View {
                         }
                         Button("Cancel", role: .cancel) {}
                     } message: {
-                        Text("This clears every setting the user made on this screen.")
+                        Text(Self.resetMessage)
                     }
             }
         }
@@ -53,10 +56,9 @@ public struct FlagDebugView: View {
 
     private static let resetAll = "Reset all"
 
-    /// Returns the catalog's flags, and reads the watcher so any change redraws the screen.
-    private func watchedFlags() -> [any AnyFlag] {
-        watcher.watch(store)
-        _ = watcher.version
-        return catalog.flags
-    }
+    /// What "Reset all" clears, and what it leaves for an override to decide.
+    private static let resetMessage = """
+        Every flag in this list forgets the user's setting, wherever in the app it was made. \
+        A flag set by a launch argument or environment variable keeps that value.
+        """
 }

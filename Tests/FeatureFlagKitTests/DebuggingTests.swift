@@ -54,20 +54,6 @@ extension FeatureFlagKitTests {
             try screen.close()
         }
 
-        @Test func test0005_5() async throws {
-            let store = FlagStore.isolated()
-            store.set(true, for: ExampleFlags.onThisDay)
-            store.set(5, for: ExampleFlags.gridColumns)
-            let (screen, user) = try render(store)
-            try await user.sees(.text("5, from user setting"))
-            try await user.taps(.button("Reset all"))
-            // The confirmation covers the screen, so this "Reset all" is the dialog's own.
-            try await user.taps(.button("Reset all"))
-            try await user.sees(.text("Off, from default"))
-            try await user.sees(.text("3, from default"))
-            try screen.close()
-        }
-
         @Test func test0005_6() async throws {
             let (screen, user) = try render(.isolated())
             try await user.sees(.role(.toggle, "On This Day"))

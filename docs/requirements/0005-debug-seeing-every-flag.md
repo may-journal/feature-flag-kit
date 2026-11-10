@@ -2,7 +2,7 @@
 
 ## Why
 
-One debug screen lists every flag, says why each is on or off, and lets me flip or reset them.
+One debug screen lists every flag, says why each is on or off, and lets me flip them.
 
 ## Measurement
 
@@ -30,10 +30,6 @@ flags in the app's catalog
   - Given Tester launches with the flag's launch argument on
     - When User opens the debug screen
       - Then the toggle is disabled, with the reason beside it
-- 0005.5
-  - Given User set two flags away from their defaults
-    - When User confirms Reset all
-      - Then every flag shows its default
 - 0005.6
   - Given User reads the debug screen with VoiceOver
     - When VoiceOver reaches a flag

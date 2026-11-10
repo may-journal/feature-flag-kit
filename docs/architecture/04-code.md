@@ -1,6 +1,6 @@
 # Code
 
-The `FeatureFlagKit` target lives under `Sources/FeatureFlagKit/`. It imports Foundation only, so an app can ship it. The `FeatureFlagKitUI` target, classes 13 to 18, lives under `Sources/FeatureFlagKitUI/`. It imports the core and SwiftUI only.
+The `FeatureFlagKit` target lives under `Sources/FeatureFlagKit/`. It imports Foundation only, so an app can ship it. The `FeatureFlagKitUI` target, classes 13 to 19, lives under `Sources/FeatureFlagKitUI/`. It imports the core and SwiftUI only.
 
 ```mermaid
 classDiagram
@@ -23,6 +23,7 @@ classDiagram
     class FlagDebugView["16 FlagDebugView"]
     class FlagDebugRow["17 FlagDebugRow"]
     class DebuggableFlag["18 DebuggableFlag"]
+    class WatchedFlagStore["19 WatchedFlagStore"]
 
     Flag ..|> AnyFlag : A
     Flag --> FlagExpiry : B
@@ -44,12 +45,12 @@ classDiagram
     InMemoryFlagSettings ..|> FlagSettings : R
     FlagStore --> InMemoryFlagSettings : S
     FlagState --> flagStore : T
-    FlagState --> FlagWatcher : U
+    FlagState --> WatchedFlagStore : U
     FlagState --> Flag : V
     FlagWatcher --> FlagStore : W
-    FlagWatcher --> FlagSettings : X
+    WatchedFlagStore --> FlagWatcher : X
     FlagDebugView --> flagStore : Y
-    FlagDebugView --> FlagWatcher : Z
+    FlagDebugView --> WatchedFlagStore : Z
     FlagDebugView --> FlagCatalog : AA
     FlagDebugView --> FlagDebugRow : BB
     FlagDebugView --> DebuggableFlag : CC
@@ -63,7 +64,8 @@ classDiagram
     Flag --> FlagStore : KK
     Flag --> FlagOrigin : LL
     FlagDebugRow --> AnyFlag : MM
-    FlagDebugView --> AnyFlag : NN
+    WatchedFlagStore --> flagStore : NN
+    WatchedFlagStore --> FlagStore : OO
 
     style Flag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style AnyFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -83,6 +85,7 @@ classDiagram
     style FlagDebugView fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagDebugRow fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style DebuggableFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style WatchedFlagStore fill:#6d28d9,stroke:#4c1d95,color:#ffffff
 ```
 
 ```mermaid
@@ -119,10 +122,11 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 12  | [`InMemoryFlagSettings`](../../Sources/FeatureFlagKit/Store/FlagSettings.swift) keeps toggles in memory. | A test gets fresh toggles with nothing to wipe. |
 | 13  | [`flagStore`](../../Sources/FeatureFlagKitUI/FlagStoreEnvironment.swift) is the environment's store, `FlagStore.live()` by default. | A preview or test swaps in its own store. |
 | 14  | [`FlagState`](../../Sources/FeatureFlagKitUI/FlagState.swift) is the `@FlagState` property wrapper, with `$binding` for the user's toggle. | A view reads a flag in one line. |
-| 15  | [`FlagWatcher`](../../Sources/FeatureFlagKitUI/FlagWatcher.swift) counts the store's toggle changes. | A view that reads the count redraws on each change. |
+| 15  | [`FlagWatcher`](../../Sources/FeatureFlagKitUI/FlagWatcher.swift) counts the store's changes, one listener at a time. | A view that reads the count redraws on each change. |
 | 16  | [`FlagDebugView`](../../Sources/FeatureFlagKitUI/FlagDebugView.swift) lists the catalog's flags, with "Reset all" behind a confirmation. | One screen says why each flag is on, and a slip clears nothing. |
 | 17  | [`FlagDebugRow`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) shows a flag's value, layer and expiry day, and its toggle or number field. | An override disables the control and says why. |
 | 18  | [`DebuggableFlag`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) reads any `Flag` without its value type. | A catalog holds flags of mixed types. |
+| 19  | [`WatchedFlagStore`](../../Sources/FeatureFlagKitUI/FlagWatcher.swift) is the environment's store, watched from `update()`. | No view starts a listener while it draws. |
 | A   | `Flag` conforms to `AnyFlag`. | The catalog holds any flag. |
 | B   | `Flag` carries its expiry day. | Expiry is part of the definition. |
 | C   | `Flag` asks `FlagEncoding` for its default settings key. | One encoding for all keys. |
@@ -143,12 +147,12 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | R   | `InMemoryFlagSettings` conforms to `FlagSettings`. | Tests swap it in for `UserDefaults`. |
 | S   | `FlagStore.isolated()` builds a store on `InMemoryFlagSettings`. | Each test starts from the defaults. |
 | T   | `@FlagState` reads the environment's store. | The app sets the store once. |
-| U   | `@FlagState` redraws on its flag's changes. | Only that flag's changes count. |
+| U   | `@FlagState` reads its store through `WatchedFlagStore`, for its own flag. | Only that flag's changes count. |
 | V   | `@FlagState` wraps one flag definition. | The definition stays the one place a default lives. |
 | W   | `FlagWatcher` listens to a store's changes. | Every store over the same settings is heard. |
-| X   | `FlagWatcher` keeps one listener per settings object. | A new store over the same settings keeps it. |
+| X   | `WatchedFlagStore` keeps one `FlagWatcher` and starts it in `update()`. | A store that hears the same changes keeps the listener. |
 | Y   | `FlagDebugView` reads the environment's store. | It shows the store the app uses. |
-| Z   | `FlagDebugView` redraws on any flag's change. | Every row stays current. |
+| Z   | `FlagDebugView` reads its store through `WatchedFlagStore`, for every flag. | Every row stays current. |
 | AA  | `FlagDebugView` walks the catalog and resets each flag once the user confirms. | "Reset all" covers the whole list. |
 | BB  | `FlagDebugView` passes each row its value and layer. | A changed value redraws the row. |
 | CC  | `FlagDebugView` reads each flag through `DebuggableFlag`. | Flags of any value type show. |
@@ -162,7 +166,8 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | KK  | [`Flag` resolves itself for the debug screen](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift). | The row needs no value type. |
 | LL  | [`Flag` returns its layer to the debug screen](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift). | The row names where the value came from. |
 | MM  | `FlagDebugRow` shows any flag's title and expiry day. | A flag of the app's own type still shows. |
-| NN  | `FlagDebugView` lists every flag in the catalog. | No flag is left off the screen. |
+| NN  | `WatchedFlagStore` reads the environment's store. | One place reads it and watches it. |
+| OO  | `WatchedFlagStore` hands its view the store. | The view reads flags through it. |
 
 ## Platforms
 

@@ -63,7 +63,7 @@ enum FlagText {
 
 /// One flag's title, value, layer and expiry day, read by VoiceOver in that order.
 /// A flag that holds a `Bool` gets a toggle for the user's layer, and one that holds an
-/// `Int` gets a stepper.
+/// `Int` gets a number field.
 struct FlagDebugRow: View {
     let flag: any AnyFlag
     let store: FlagStore

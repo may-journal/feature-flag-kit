@@ -32,7 +32,7 @@ enum FlagDebugStory {
         return store
     }
 
-    /// A store where the user stepped Grid columns from 3 up to 5.
+    /// A store where the user typed 5 for Grid columns, whose default is 3.
     static var edited: FlagStore {
         let store = FlagStore.isolated()
         store.set(5, for: gridColumns)

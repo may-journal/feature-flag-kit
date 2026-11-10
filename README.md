@@ -95,7 +95,7 @@ xcodegen generate --spec Examples/FlagDebugDemo/project.yml
 open Examples/FlagDebugDemo/FlagDebugDemo.xcodeproj
 ```
 
-The demo signs with the owner's team, so a fork sets its own `DEVELOPMENT_TEAM` in [project.yml](Examples/FlagDebugDemo/project.yml). `make demo` builds it with no signing credentials, as CI would. `make demo-install DEVICE=<udid>` signs it, installs it on a paired device and launches it.
+The demo signs with the owner's team and bundle ID, so a fork sets its own `DEVELOPMENT_TEAM` and `bundleIdPrefix` in [project.yml](Examples/FlagDebugDemo/project.yml). The [Makefile](Makefile)'s `demo` target builds it with no signing credentials, and `demo-install` runs it on a paired device.
 
 ## Test
 

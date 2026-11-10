@@ -1,5 +1,6 @@
 # A tiny iOS app, the only one linking StorybookKit, that shows FeatureFlagKitUI's previews.
 # XcodeGen turns this into FlagDebugDemo.xcodeproj, which git ignores.
+# cspell:ignore mayjournal AMPJZXR
 name: FlagDebugDemo
 options:
   bundleIdPrefix: com.mayjournal
@@ -16,6 +17,8 @@ targets:
     type: application
     platform: iOS
     sources: [FlagDebugDemo]
+    # A shared scheme, so xcodebuild finds FlagDebugDemo on a clean checkout.
+    scheme: {}
     dependencies:
       - package: FeatureFlagKit
         product: FeatureFlagKitUI
@@ -26,7 +29,8 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         SWIFT_VERSION: "6.0"
-        # The owner's individual team. Build unsigned with `make demo`, which passes CODE_SIGNING_ALLOWED=NO.
+        # The owner's individual team; the Makefile's demo target builds without it.
+        CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: AMPJZXR538
         # Keeps every preview in the static FeatureFlagKitUI library linked, for the storybook.
         OTHER_LDFLAGS: $(inherited) -all_load

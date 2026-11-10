@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/may-journal/feature-flag-kit/compare/v1.0.0...v1.1.0) (2026-11-10)
+
+
+### Features
+
+* **ui:** SwiftUI flag wrapper and debug screen ([#8](https://github.com/may-journal/feature-flag-kit/issues/8)) ([a5b3a8d](https://github.com/may-journal/feature-flag-kit/commit/a5b3a8d09e20819ee724173da1dda50ca4abf4e7))
+
 ## 1.0.0 (2026-11-10)
 
 

@@ -16,13 +16,24 @@ enum ExampleFlags {
 
     /// The example app's whole list, as its debug screen walks it.
     static let catalog = FlagCatalog([onThisDay, gridColumns])
+
+    /// A permanent setting with a list of choices, kept under an earlier release's key.
+    static let sortOrder = Flag(
+        "sortOrder", default: SortOrder.newest, title: "Sort order",
+        legacySettingsKey: "browse.sortOrder")
+}
+
+/// The choices of the example app's sort setting, a flag value with no code of its own.
+enum SortOrder: String, FlagValue {
+    case newest
+    case oldest
 }
 
 /// A flag of the app's own type rather than a `Flag`, which no store can resolve.
 struct CustomFlag: AnyFlag {
     let name = "legacyBanner"
     let title = "Legacy banner"
-    let expires = FlagExpiry(year: 2097, month: 3, day: 1)
+    let expires: FlagExpiry? = FlagExpiry(year: 2097, month: 3, day: 1)
     let settingsKey = "flag.legacyBanner"
 }
 

@@ -29,3 +29,15 @@ struct BetaSettingsScreen: View {
         }
     }
 }
+
+/// An example app's Settings screen for its sort setting, with a button that picks a choice.
+struct SortSettingsScreen: View {
+    @FlagState(ExampleFlags.sortOrder) private var sortOrder
+
+    var body: some View {
+        VStack {
+            Text("Sorted by \(sortOrder.rawValue)")
+            Button("Oldest first") { $sortOrder.wrappedValue = .oldest }
+        }
+    }
+}

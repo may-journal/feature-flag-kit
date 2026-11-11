@@ -42,3 +42,7 @@ flags in the app's catalog
   - Given Tester launches with a number flag's launch argument
     - When User opens the debug screen
       - Then the number field is disabled, with the reason beside it
+- 0005.9
+  - Given Developer lists a setting with no expiry day
+    - When User opens the debug screen
+      - Then its row shows no expiry day

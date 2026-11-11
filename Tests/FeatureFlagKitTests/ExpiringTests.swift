@@ -36,4 +36,9 @@ import Testing
         let catalog = FlagCatalog([ExampleFlags.onThisDay, tomorrow])
         #expect(catalog.expired(asOf: tokyoMorning).isEmpty)
     }
+
+    @Test func test0003_4() {
+        let catalog = FlagCatalog([ExampleFlags.sortOrder])
+        #expect(catalog.expired(asOf: .distantFuture).isEmpty)
+    }
 }

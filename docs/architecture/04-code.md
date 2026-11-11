@@ -29,6 +29,9 @@ classDiagram
     class FlagOverride["20 FlagOverride"]
     class FlagLaunch["21 FlagLaunch"]
     class FlagLaunching["22 FlagLaunching"]
+    class FlagChange["23 FlagChange"]
+    class FlagRawValue["24 FlagRawValue"]
+    class FlagWriter["25 FlagWriter"]
 
     Flag ..|> AnyFlag : A
     Flag --> FlagExpiry : B
@@ -77,6 +80,11 @@ classDiagram
     FlagOverride --> FlagEncoding : RR
     FlagLaunching --> FlagLaunch : SS
     FlagLaunching --> FlagOverride : UU
+    FlagStore --> FlagChange : VV
+    FlagChange --> FlagRawValue : WW
+    FlagChange --> FlagWriter : XX
+    FlagStore --> FlagRawValue : YY
+    FlagStore --> FlagCatalog : ZZ
 
     style Flag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style AnyFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -100,6 +108,9 @@ classDiagram
     style FlagOverride fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagLaunch fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagLaunching fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style FlagChange fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style FlagRawValue fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style FlagWriter fill:#6d28d9,stroke:#4c1d95,color:#ffffff
 ```
 
 ```mermaid
@@ -122,13 +133,13 @@ Numbers on classes and letters on relationships match the callout table. See [02
 
 | #   | Description | Why |
 | --- | --- | --- |
-| 1   | [`Flag`](../../Sources/FeatureFlagKit/Definitions/Flag.swift) is one flag: name, compiled default, title, expiry day and settings key. | Each flag is defined once. |
+| 1   | [`Flag`](../../Sources/FeatureFlagKit/Definitions/Flag.swift) is one flag: name, compiled default, title, settings key and an expiry day, which a permanent setting leaves out. | Each flag is defined once. |
 | 2   | [`AnyFlag`](../../Sources/FeatureFlagKit/Definitions/Flag.swift) is what every flag states, whatever value it holds. | A catalog lists flags of mixed types. |
-| 3   | [`FlagValue`](../../Sources/FeatureFlagKit/Definitions/FlagValue.swift) is a type a flag holds: `Bool`, `Int`, `Double` or `String`. | Overrides arrive as text and toggles as stored values. |
+| 3   | [`FlagValue`](../../Sources/FeatureFlagKit/Definitions/FlagValue.swift) is a type a flag holds: `Bool`, `Int`, `Double`, `String` or an enum with a `String` raw value. | Overrides arrive as text and toggles as stored values. |
 | 4   | [`FlagExpiry`](../../Sources/FeatureFlagKit/Definitions/FlagExpiry.swift) is the day a flag should be gone, from its start in UTC. | Every machine agrees on the day. |
 | 5   | [`FlagCatalog`](../../Sources/FeatureFlagKit/Definitions/FlagCatalog.swift) is the app's list of flags, with `expired(asOf:)`. | An app test fails once a flag outstays its day. |
 | 6   | [`FlagEncoding`](../../Sources/FeatureFlagKit/Definitions/FlagEncoding.swift) spells `-flag.<name>`, `FLAG_<NAME>` and `flag.<name>`. | Every target reads one encoding. |
-| 7   | [`FlagStore`](../../Sources/FeatureFlagKit/Store/FlagStore.swift) resolves a flag through its sources, then the default, and streams toggle changes. | Precedence lives in one place. |
+| 7   | [`FlagStore`](../../Sources/FeatureFlagKit/Store/FlagStore.swift) resolves a flag through its sources, then the default, streams changes and imports the user's values. | Precedence lives in one place. |
 | 8   | [`FlagSource`](../../Sources/FeatureFlagKit/Store/FlagSource.swift) is one place a value comes from: launch arguments, environment or settings. | A later source can join without changing the store. |
 | 9   | [`FlagSettings`](../../Sources/FeatureFlagKit/Store/FlagSettings.swift) is the small key-value protocol that `UserDefaults` conforms to. | A test swaps memory in for the app's settings. |
 | 10  | [`FlagOrigin`](../../Sources/FeatureFlagKit/Store/FlagOrigin.swift) names where a value came from. | A debug screen can say why a flag is on. |
@@ -144,8 +155,11 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 20  | [`FlagOverride`](../../Sources/FeatureFlagKitTesting/FlagLaunch.swift) is one flag forced to one value, as launch arguments and environment. | A test names the flag, not its spelling. |
 | 21  | [`FlagLaunch`](../../Sources/FeatureFlagKitTesting/FlagLaunch.swift) turns overrides into launch arguments or environment. | A test appends them to its launch. |
 | 22  | [`FlagLaunching`](../../Sources/FeatureFlagKitTesting/XCUIApplication+Flags.swift) is an app a UI test launches; `XCUIApplication` conforms. | Its helpers keep the arguments and environment already set. |
+| 23  | [`FlagChange`](../../Sources/FeatureFlagKit/Store/FlagChange.swift) is one change to the user's layer: name, key, new value and writer. | A sync hook copies it to another store. |
+| 24  | [`FlagRawValue`](../../Sources/FeatureFlagKit/Store/FlagChange.swift) is a stored value that crosses threads and compares equal. | Another store reads and writes property-list values. |
+| 25  | [`FlagWriter`](../../Sources/FeatureFlagKit/Store/FlagChange.swift) says whether the app or an import wrote a change. | A sync hook never sends an import back. |
 | A   | `Flag` conforms to `AnyFlag`. | The catalog holds any flag. |
-| B   | `Flag` carries its expiry day. | Expiry is part of the definition. |
+| B   | `Flag` carries its expiry day, when it has one. | Expiry is part of a beta flag's definition. |
 | C   | `Flag` asks `FlagEncoding` for its default settings key. | One encoding for all keys. |
 | D   | `AnyFlag` exposes the expiry day. | The catalog reads it without the value type. |
 | E   | `FlagCatalog` lists flags as `AnyFlag`. | One list per app. |
@@ -191,6 +205,11 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | SS  | `FlagLaunching` appends `FlagLaunch` arguments and merges its environment. | A UI test adds overrides in one line. |
 | TT  | `FlagOverride` accepts any `FlagValue`. | `flagText` writes it as text its type reads back. |
 | UU  | `overrideFlags` takes overrides. | The UI test names flags, not their spelling. |
+| VV  | `FlagStore.userChanges(in:)` streams a `FlagChange` for each change to the catalog's user layer. | It hears the same writes as `changes()`. |
+| WW  | `FlagChange` holds the new value, or nil when cleared. | A sync hook clears the key elsewhere too. |
+| XX  | `FlagChange` names its writer. | Imports are marked. |
+| YY  | `FlagStore.importUserValues(_:)` writes raw values by settings key. | Values from another store land in the user's layer. |
+| ZZ  | `FlagStore.userChanges(in:)` watches every flag in a catalog. | A sync hook hears flags no view has read. |
 
 ## Platforms
 

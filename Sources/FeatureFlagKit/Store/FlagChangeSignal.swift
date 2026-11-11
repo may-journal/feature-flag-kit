@@ -1,7 +1,7 @@
 import Foundation
 
-/// Tells listeners each watched flag whose stored toggle changed, for all stores sharing settings.
-/// Unchecked because the lock guards `listeners` and `watched`.
+/// Tells listeners each change to a watched flag's stored value, for all stores sharing settings.
+/// Unchecked because the lock guards its state.
 final class FlagChangeSignal: @unchecked Sendable {
     /// A watched flag's name and the last stored value this signal saw.
     private struct Watched {
@@ -11,8 +11,10 @@ final class FlagChangeSignal: @unchecked Sendable {
 
     private let settings: any FlagSettings
     private let lock = NSLock()
-    private var listeners: [UUID: AsyncStream<String>.Continuation] = [:]
+    private var listeners: [UUID: @Sendable (FlagChange) -> Void] = [:]
     private var watched: [String: Watched] = [:]
+    /// Keys an import is writing now, so a change seen on one is marked as an import.
+    private var importing: [String: Int] = [:]
     private let observer = DefaultsObserver()
 
     init(_ settings: any FlagSettings) {
@@ -28,10 +30,19 @@ final class FlagChangeSignal: @unchecked Sendable {
         return SignalRegistry.shared.signal(for: settings)
     }
 
-    func stream() -> AsyncStream<String> {
-        let (stream, continuation) = AsyncStream<String>.makeStream()
+    /// Streams each change, turned into an element by `element`, which may skip one with nil.
+    func stream<Element: Sendable>(
+        _ element: @escaping @Sendable (FlagChange) -> Element?
+    ) -> AsyncStream<Element> {
+        let (stream, continuation) = AsyncStream<Element>.makeStream()
         let id = UUID()
-        lock.withLock { listeners[id] = continuation }
+        lock.withLock {
+            listeners[id] = { change in
+                if let value = element(change) {
+                    continuation.yield(value)
+                }
+            }
+        }
         continuation.onTermination = { [weak self] _ in
             self?.lock.withLock { _ = self?.listeners.removeValue(forKey: id) }
         }
@@ -50,23 +61,47 @@ final class FlagChangeSignal: @unchecked Sendable {
         }
     }
 
+    /// Runs `write`, which sets `keys`, and reports each change to them as an import, even one
+    /// a settings notification reports before `write` returns.
+    func importing(_ keys: [String], _ write: () -> Void) {
+        lock.withLock {
+            for key in keys {
+                importing[key, default: 0] += 1
+            }
+        }
+        defer {
+            lock.withLock {
+                for key in keys {
+                    importing[key, default: 1] -= 1
+                    if importing[key] == 0 { importing[key] = nil }
+                }
+            }
+        }
+        write()
+        for key in keys {
+            check(key: key)
+        }
+    }
+
     /// Sends each watched flag whose stored value changed since the last check.
     /// With `key`, checks only the flag under that key.
     func check(key: String? = nil) {
         let keys = lock.withLock { key.map { [$0] } ?? Array(watched.keys) }
         // Read outside the lock, since a settings read may run other code.
         let now = keys.map { ($0, settings.object(forKey: $0)) }
-        let names = lock.withLock {
-            now.compactMap { key, stored -> String? in
+        let changes = lock.withLock {
+            now.compactMap { key, stored -> FlagChange? in
                 guard let entry = watched[key], !Self.same(entry.stored, stored) else { return nil }
                 watched[key]?.stored = stored
-                return entry.name
+                return FlagChange(
+                    name: entry.name, key: key, rawValue: stored.flatMap(FlagRawValue.init),
+                    writer: importing[key] == nil ? .app : .import)
             }
         }
         let current = lock.withLock { Array(listeners.values) }
-        for name in names {
+        for change in changes {
             for listener in current {
-                listener.yield(name)
+                listener(change)
             }
         }
     }

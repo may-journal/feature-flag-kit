@@ -23,6 +23,18 @@ enum AppFlags {
 
 A toggle lives in `UserDefaults` under `flag.<name>`. Pass `legacySettingsKey` to keep a key an earlier release already wrote, so the user's choice carries over.
 
+A beta flag carries an expiry day. Leave `expires` out for a permanent setting, which the expiry test never names. An enum with a `String` raw value becomes a value by declaring the conformance, and settings store its raw value:
+
+```swift
+enum SortOrder: String, FlagValue {
+    case newest, oldest
+}
+
+static let sortOrder = Flag(
+    "sortOrder", default: SortOrder.newest, title: "Sort order",
+    legacySettingsKey: "browse.sortOrder")
+```
+
 ## Read and toggle
 
 ```swift
@@ -32,7 +44,7 @@ flags.set(true, for: AppFlags.onThisDay)   // the user's Settings toggle
 flags.reset(AppFlags.onThisDay)            // back to the default
 ```
 
-A toggle set to the default, or to nil, removes its key, so it follows a later release's default. `changes()` streams the name of each flag whose toggle changed, through any store over the same settings or straight in `UserDefaults`. `FlagCatalog` is a collection, so a screen can list every flag and its title.
+A toggle set to the default, or to nil, removes its key, so it follows a later release's default. `changes()` streams the name of each flag whose toggle changed, through any store over the same settings or straight in `UserDefaults`. [Sync the user's settings](#sync-the-users-settings) covers the fuller changes a sync hook reads. `FlagCatalog` is a collection, so a screen can list every flag and its title.
 
 `resolve(_:)` returns the value and where it came from. The store asks, in order:
 
@@ -42,6 +54,47 @@ A toggle set to the default, or to nil, removes its key, so it follows a later r
 1. The compiled default.
 
 `FlagEncoding` spells each name. Bool flags read `YES`, `NO`, `true`, `false`, `1` and `0`. A value is written as its `flagText`, its description unless its type sets one that reads back.
+
+## Sync the user's settings
+
+The kit holds no cloud code. An app that copies the user's settings to another store uses two calls:
+
+- `userChanges(in:)` streams a `FlagChange` for each change to the user's layer.
+- Each change holds the key, the new `FlagRawValue` or nil when cleared, and its writer.
+- `importUserValues(_:)` writes values by settings key and updates watching views.
+- Its changes are marked `.import`, so the hook never sends them back.
+
+A sketch with iCloud key-value storage, which the app writes itself:
+
+```swift
+let flags = FlagStore.live()
+let cloud = NSUbiquitousKeyValueStore.default
+
+// Send the app's own writes up.
+Task {
+    for await change in flags.userChanges(in: AppFlags.catalog) where change.writer == .app {
+        if let value = change.rawValue {
+            cloud.set(value.propertyList, forKey: change.key)
+        } else {
+            cloud.removeObject(forKey: change.key)
+        }
+    }
+}
+
+// Bring other devices' writes down, as imports.
+let keys = Set(AppFlags.catalog.map(\.settingsKey))
+NotificationCenter.default.addObserver(
+    forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification, object: cloud, queue: .main
+) { note in
+    let changed = note.userInfo?[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String] ?? []
+    var values: [String: FlagRawValue?] = [:]
+    for key in changed where keys.contains(key) {
+        values[key] = cloud.object(forKey: key).flatMap(FlagRawValue.init(propertyList:))
+    }
+    flags.importUserValues(values)
+}
+cloud.synchronize()
+```
 
 ## Use in SwiftUI
 
@@ -66,7 +119,7 @@ struct MemoriesView: View {
 
 ## Debug screen
 
-`FlagDebugView(catalog:)` lists every flag in the catalog. Each row shows the title, value, the layer that set it and the expiry day.
+`FlagDebugView(catalog:)` lists every flag in the catalog. Each row shows the title, value, the layer that set it and the expiry day, which a permanent setting leaves out.
 
 A `Bool` flag gets a toggle for the user's layer, and an `Int` flag gets a number field. The row names that layer "user setting". Each control is disabled, with the reason, while a launch argument or environment variable sets the flag. "Reset all" asks first, then clears every user setting in the catalog.
 

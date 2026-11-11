@@ -72,8 +72,8 @@ Numbers on nodes and letters on arrows match the callout table.
 | --- | --- | --- |
 | 1   | The developer who lists the app's flags. | Each app keeps its own list. |
 | 2   | The core library. | It holds no UI and no XCTest. |
-| 3   | A flag, its value types, its expiry day, the catalog and the override encoding. | The definition is the one place a default lives. |
-| 4   | The store, its sources and the settings it writes. | Precedence lives in one place. |
+| 3   | A flag, its value types, its optional expiry day, the catalog and the override encoding. | The definition is the one place a default lives. |
+| 4   | The store, its sources, the settings it writes and the changes it reports. | Precedence lives in one place. |
 | 5   | `Package.swift`, which names the three products and their platforms. | It states Swift 6, iOS 26 and macOS 26. |
 | 6   | Holds the user's toggles. | Apps already keep toggles there. |
 | 7   | Carries the overrides a launch sets. | Tests and manual runs need no rebuild. |

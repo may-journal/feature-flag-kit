@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/may-journal/feature-flag-kit/compare/v1.1.0...v1.2.0) (2026-11-11)
+
+
+### Features
+
+* **testing:** add launch helpers for forcing flags from tests ([#13](https://github.com/may-journal/feature-flag-kit/issues/13)) ([b505d8f](https://github.com/may-journal/feature-flag-kit/commit/b505d8f5887945362a33e5276989afea4902376f))
+
 ## [1.1.0](https://github.com/may-journal/feature-flag-kit/compare/v1.0.0...v1.1.0) (2026-11-10)
 
 

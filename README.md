@@ -95,6 +95,8 @@ xcodegen generate --spec Examples/FlagDebugDemo/project.yml
 open Examples/FlagDebugDemo/FlagDebugDemo.xcodeproj
 ```
 
+The demo signs with the owner's team and bundle ID, so a fork sets its own `DEVELOPMENT_TEAM` and `bundleIdPrefix` in [project.yml](Examples/FlagDebugDemo/project.yml). The [Makefile](Makefile)'s `demo` target builds it with no signing credentials, and `demo-install` runs it on a paired device.
+
 ## Test
 
 Give each test a fresh store, with toggles held in memory. Pass arguments or environment to force a flag:

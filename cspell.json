@@ -16,10 +16,13 @@
   "words": [
     "bootstatus",
     "deinit",
+    "devicectl",
     "fitnessrc",
     "INFOPLIST",
+    "iphoneos",
     "iphonesimulator",
     "jasonvanderslice",
+    "libexec",
     "simctl",
     "swiftlint",
     "swiftpm",

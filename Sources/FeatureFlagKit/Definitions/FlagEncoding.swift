@@ -38,9 +38,15 @@ public enum FlagEncoding {
     }
 
     /// The launch arguments that set `flag` to `value`, ready to append to a launch.
-    public static func arguments<Value: FlagValue>(
+    public static func arguments<Value: FlagValue>(_ flag: Flag<Value>, _ value: Value) -> [String]
+    {
+        [argument(for: flag.name), value.flagText]
+    }
+
+    /// The environment variable that sets `flag` to `value`, ready to merge into a launch.
+    public static func environment<Value: FlagValue>(
         _ flag: Flag<Value>, _ value: Value
-    ) -> [String] where Value: CustomStringConvertible {
-        [argument(for: flag.name), value.description]
+    ) -> [String: String] {
+        [environmentVariable(for: flag.name): value.flagText]
     }
 }

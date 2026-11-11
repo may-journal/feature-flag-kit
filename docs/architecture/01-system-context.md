@@ -48,7 +48,7 @@ Numbers on nodes and letters on arrows match the callout table.
 | 1   | Defines each flag once and gates features on it. | The app keeps its own flag list; the kit supplies the machinery. |
 | 2   | Turns a flag on or off in the app's Settings or debug screen. | The user's own choice stays theirs. |
 | 3   | Forces a flag for a test or a manual run. | Overrides leave the user's toggle untouched. |
-| 4   | The `FeatureFlagKit` core and the `FeatureFlagKitUI` SwiftUI products. | Neither holds XCTest, so the app can ship both. |
+| 4   | The `FeatureFlagKit` core and `FeatureFlagKitUI` SwiftUI products, and `FeatureFlagKitTesting` for tests. | Only the testing product holds XCTest, so the app can ship the other two. |
 | 5   | The app that depends on the kit. | It reads flags to decide what to show. |
 | 6   | Holds the user's toggles, under `flag.<name>` or an older key. | Toggles from an earlier release keep working. |
 | 7   | Carries `-flag.<name> <value>` and `FLAG_<NAME>` overrides. | A launch sets them without a rebuild. |

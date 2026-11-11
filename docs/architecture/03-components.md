@@ -18,6 +18,10 @@ C4Component
         Component(views, "9 Views", "SwiftUI", "Sources/FeatureFlagKitUI")
     }
 
+    Container_Boundary(testing, "12 FeatureFlagKitTesting") {
+        Component(helpers, "13 Launch helpers", "Swift, XCTest", "Sources/FeatureFlagKitTesting")
+    }
+
     Container_Boundary(demo, "10 FlagDebugDemo") {
         Component(example, "11 Demo app", "SwiftUI", "Examples/FlagDebugDemo/FlagDebugDemo")
     }
@@ -34,12 +38,14 @@ C4Component
     Rel(views, store, "G")
     Rel(views, definitions, "H")
     Rel(example, views, "I")
+    Rel(helpers, definitions, "J")
 
     UpdateElementStyle(developer, $bgColor="#334155", $borderColor="#1e293b", $fontColor="#ffffff")
     UpdateElementStyle(definitions, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
     UpdateElementStyle(store, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
     UpdateElementStyle(manifest, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
     UpdateElementStyle(views, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
+    UpdateElementStyle(helpers, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
     UpdateElementStyle(example, $bgColor="#b45309", $borderColor="#92400e", $fontColor="#ffffff")
     UpdateElementStyle(defaults, $bgColor="#64748b", $borderColor="#475569", $fontColor="#ffffff")
     UpdateElementStyle(process, $bgColor="#64748b", $borderColor="#475569", $fontColor="#ffffff")
@@ -68,13 +74,15 @@ Numbers on nodes and letters on arrows match the callout table.
 | 2   | The core library. | It holds no UI and no XCTest. |
 | 3   | A flag, its value types, its expiry day, the catalog and the override encoding. | The definition is the one place a default lives. |
 | 4   | The store, its sources and the settings it writes. | Precedence lives in one place. |
-| 5   | `Package.swift`, which names both products and their platforms. | It states Swift 6, iOS 26 and macOS 26. |
+| 5   | `Package.swift`, which names the three products and their platforms. | It states Swift 6, iOS 26 and macOS 26. |
 | 6   | Holds the user's toggles. | Apps already keep toggles there. |
 | 7   | Carries the overrides a launch sets. | Tests and manual runs need no rebuild. |
 | 8   | The SwiftUI library. | SwiftUI stays out of the core. |
 | 9   | The `flagStore` environment value, `@FlagState` and `FlagDebugView`. | One place for SwiftUI. |
 | 10  | The example iOS app, which alone links StorybookKit. | Apps that add the kit never inherit the storybook. |
 | 11  | Opens the storybook, or with `--storybook "<story name>"` one story. | Each state is seen without tapping to it. |
+| 12  | The testing library, linked only by test targets. | XCTest stays out of the app. |
+| 13  | `FlagLaunch`, `FlagOverride` and `overrideFlags` on a UI test app. | A test spells overrides the way the store reads them. |
 | A   | Defines each flag once. | One typed definition replaces repeated defaults. |
 | B   | Resolves a flag from its definition. | The default is the last resort. |
 | C   | Reads and writes the user's toggles. | Older keys keep working. |
@@ -84,3 +92,4 @@ Numbers on nodes and letters on arrows match the callout table.
 | G   | Resolves, sets and resets flags, and hears their changes. | Views redraw when a toggle changes. |
 | H   | Reads each flag's definition and the catalog. | The debug screen walks the app's list. |
 | I   | Lists the previews FeatureFlagKitUI declares. | The storybook shows these previews. |
+| J   | Spells each override through the core's `FlagEncoding`. | The encoding lives in one place. |

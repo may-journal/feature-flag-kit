@@ -83,5 +83,14 @@ extension FeatureFlagKitTests {
             try await user.sees(.text("Set by the launch argument, which beats this setting."))
             try screen.close()
         }
+
+        @Test func test0005_9() async throws {
+            let catalog = FlagCatalog([ExampleFlags.sortOrder])
+            let (screen, user) = try render(.isolated(), catalog: catalog)
+            try await user.sees(.text("newest, from default"))
+            let spoken = await user.reads().map(\.spoken)
+            #expect(!spoken.contains { $0.hasPrefix("Expires") })
+            try screen.close()
+        }
     }
 }

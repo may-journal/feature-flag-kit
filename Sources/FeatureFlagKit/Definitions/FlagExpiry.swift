@@ -6,16 +6,30 @@ public struct FlagExpiry: Sendable, Hashable {
     public let year: Int
     public let month: Int
     public let day: Int
+    /// Whether this is `never`, whose year, month and day are zero.
+    public let isNever: Bool
 
     public init(year: Int, month: Int, day: Int) {
         self.year = year
         self.month = month
         self.day = day
+        isNever = false
     }
 
-    /// Whether `date` falls on or after the expiry day. A day that does not
-    /// exist, such as 30 February, counts as passed, so the expiry test names it.
+    /// No expiry day, for a permanent setting, which never counts as expired.
+    public static let never = FlagExpiry()
+
+    private init() {
+        year = 0
+        month = 0
+        day = 0
+        isNever = true
+    }
+
+    /// Whether `date` falls on or after the expiry day, which `never` has not. A day that does
+    /// not exist, such as 30 February, counts as passed, so the expiry test names it.
     public func isPassed(asOf date: Date) -> Bool {
+        if isNever { return false }
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .gmt
         let parts = DateComponents(year: year, month: month, day: day)

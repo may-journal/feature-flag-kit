@@ -63,3 +63,14 @@ extension String: FlagValue {
         self = flagText
     }
 }
+
+/// An enum with a `String` raw value becomes a flag value by declaring the conformance alone,
+/// as `extension SortOrder: FlagValue {}`. Settings store the raw value, and overrides spell it.
+extension FlagValue where Self: RawRepresentable, RawValue == String {
+    public var stored: Any { rawValue }
+    public var flagText: String { rawValue }
+
+    public init?(flagText: String) {
+        self.init(rawValue: flagText)
+    }
+}

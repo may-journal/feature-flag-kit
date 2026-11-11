@@ -79,7 +79,34 @@ public struct FlagStore: Sendable {
     /// The names of flags read or set through any store over these settings
     /// whose toggle changes, from now on, including direct `UserDefaults` writes.
     public func changes() -> AsyncStream<String> {
-        signal.stream()
+        signal.stream { $0.name }
+    }
+
+    /// Each later change to the user's layer for a flag in `catalog`, as heard by `changes()`.
+    /// A sync hook sends the app's writes to another store and skips the imports.
+    public func userChanges(in catalog: FlagCatalog) -> AsyncStream<FlagChange> {
+        let keys = Set(catalog.map(\.settingsKey))
+        let stream = signal.stream { event in
+            event.change.flatMap { keys.contains($0.key) ? $0 : nil }
+        }
+        for flag in catalog {
+            signal.watch(flag)
+        }
+        return stream
+    }
+
+    /// Writes another store's values by settings key, as `set` would, with nil to clear one.
+    /// Each change is an import; a key no store watches, or a value of another type, is skipped.
+    public func importUserValues(_ values: [String: FlagRawValue?]) {
+        signal.importValues(values)
+    }
+
+    /// Calls `onChange` with each changed flag's name, as `changes()` streams it, until the
+    /// returned observation is freed. No task waits between changes.
+    package func observeChanges(_ onChange: @escaping @Sendable (String) -> Void)
+        -> FlagObservation
+    {
+        signal.observe { onChange($0.name) }
     }
 
     /// Equal for stores whose `changes()` hear the same writes, so a listener keeps its stream.

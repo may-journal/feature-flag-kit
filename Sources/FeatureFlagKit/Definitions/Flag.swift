@@ -6,13 +6,14 @@ public protocol AnyFlag: Sendable {
     var name: String { get }
     /// The words the user reads beside the flag's toggle.
     var title: String { get }
-    /// The day the flag should be gone from the app.
+    /// The day the flag should be gone from the app, or `FlagExpiry.never` for a setting.
     var expires: FlagExpiry { get }
     /// The settings key that holds the user's toggle.
     var settingsKey: String { get }
 }
 
 /// One flag, defined once: its name, compiled default, title and expiry day.
+/// A flag with no expiry day is a permanent setting, which the expiry test never names.
 public struct Flag<Value: FlagValue>: AnyFlag {
     public let name: String
     public let defaultValue: Value
@@ -21,9 +22,10 @@ public struct Flag<Value: FlagValue>: AnyFlag {
     public let settingsKey: String
 
     /// Defines a flag whose toggle lives under `flag.<name>`, or under
-    /// `legacySettingsKey` when an earlier release already stored it there.
+    /// `legacySettingsKey` when an earlier release already stored it there. Leave out
+    /// `expires` for a permanent setting.
     public init(
-        _ name: String, default defaultValue: Value, title: String, expires: FlagExpiry,
+        _ name: String, default defaultValue: Value, title: String, expires: FlagExpiry = .never,
         legacySettingsKey: String? = nil
     ) {
         self.name = name

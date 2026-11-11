@@ -41,8 +41,9 @@ enum FlagText {
     /// What a row says for a flag of the app's own type, which no store can resolve.
     static let unknown = "Value unknown, not a Flag"
 
+    /// "On" or "Off" for a `Bool`, otherwise the value's `flagText`, such as a choice's raw value.
     static func value(_ value: some FlagValue) -> String {
-        guard let bool = value as? Bool else { return String(describing: value) }
+        guard let bool = value as? Bool else { return value.flagText }
         return bool ? "On" : "Off"
     }
 
@@ -61,7 +62,7 @@ enum FlagText {
     }
 }
 
-/// One flag's title, value, layer and expiry day, read by VoiceOver in that order.
+/// One flag's title, value, layer and expiry day if it has one, read by VoiceOver in that order.
 /// A flag that holds a `Bool` gets a toggle for the user's layer, and one that holds an
 /// `Int` gets a number field.
 struct FlagDebugRow: View {
@@ -79,8 +80,11 @@ struct FlagDebugRow: View {
                 .disabled(overriding)
             Text(
                 shown.map { "\($0.value), from \(FlagText.origin($0.origin))" } ?? FlagText.unknown)
-            Text(FlagText.expiry(flag.expires))
-                .foregroundStyle(.secondary)
+            // A permanent setting has no expiry day to show.
+            if !flag.expires.isNever {
+                Text(FlagText.expiry(flag.expires))
+                    .foregroundStyle(.secondary)
+            }
             if overriding, let shown {
                 Text(FlagText.overridden(by: shown.origin))
                     .foregroundStyle(.secondary)

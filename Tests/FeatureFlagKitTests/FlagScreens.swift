@@ -30,6 +30,36 @@ struct BetaSettingsScreen: View {
     }
 }
 
+/// An example app's day screen, which offers a suggestion while its child flag reads on.
+/// Its own Settings toggle writes the child's saved setting, whatever the parent says.
+struct DaySuggestionsScreen: View {
+    @FlagState(ExampleFlags.daySuggestions) private var daySuggestions
+
+    var body: some View {
+        Form {
+            Text(daySuggestions ? "Day suggestion ready" : "No day suggestion")
+            Toggle("Suggest for days", isOn: $daySuggestions)
+        }
+    }
+}
+
+/// An example app screen that reads the day child afresh each time the store names it changed.
+struct DaySuggestionsListener: View {
+    let store: FlagStore
+    @State private var isOn = false
+
+    var body: some View {
+        Text(isOn ? "Day suggestion ready" : "No day suggestion")
+            .task {
+                let changes = store.changes()
+                isOn = store[ExampleFlags.daySuggestions]
+                for await name in changes where name == ExampleFlags.daySuggestions.name {
+                    isOn = store[ExampleFlags.daySuggestions]
+                }
+            }
+    }
+}
+
 /// An example app's Settings screen for its sort setting, with a button that picks a choice.
 struct SortSettingsScreen: View {
     @FlagState(ExampleFlags.sortOrder) private var sortOrder

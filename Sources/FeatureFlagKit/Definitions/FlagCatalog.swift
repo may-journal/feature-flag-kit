@@ -19,4 +19,24 @@ public struct FlagCatalog: Sendable, RandomAccessCollection {
     public func expired(asOf date: Date = .now) -> [any AnyFlag] {
         filter { $0.expires.isPassed(asOf: date) }
     }
+
+    /// Every flag with each listed child moved right under its parent, as a debug screen shows
+    /// them. A child whose parent the catalog doesn't list stays where the app put it.
+    public var grouped: [(flag: any AnyFlag, isChild: Bool)] {
+        // Parents are matched by settings key, the one thing no two listed flags share.
+        let listed = Set(map(\.settingsKey))
+        var children: [String: [any AnyFlag]] = [:]
+        var tops: [any AnyFlag] = []
+        for flag in flags {
+            if let key = flag.parent?.settingsKey, listed.contains(key) {
+                children[key, default: []].append(flag)
+            } else {
+                tops.append(flag)
+            }
+        }
+        return tops.flatMap { flag in
+            [(flag: flag, isChild: false)]
+                + (children[flag.settingsKey] ?? []).map { (flag: $0, isChild: true) }
+        }
+    }
 }

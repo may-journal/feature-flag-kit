@@ -6,12 +6,14 @@ final class FlagChangeSignal: @unchecked Sendable {
     /// A watched flag's name, the last stored value this signal saw, and how it imports a value.
     private struct Watched {
         let name: String
+        /// The parent's settings key, whose change also changes this flag's value.
+        let parentKey: String?
         var stored: Any?
         let importing: (@Sendable (FlagRawValue) -> FlagImport)?
     }
 
-    /// One change as listeners hear it. `change` is nil when the stored value is not a
-    /// property-list value, so a sync hook never mistakes it for a cleared one.
+    /// One change as listeners hear it. A sync hook skips a nil `change`: a stored value
+    /// that is not a property-list value, or a child whose parent changed.
     struct Event: Sendable {
         let name: String
         let change: FlagChange?
@@ -64,16 +66,18 @@ final class FlagChangeSignal: @unchecked Sendable {
         lock.withLock { _ = listeners.removeValue(forKey: id) }
     }
 
-    /// Starts watching a flag's settings key, from its value now.
+    /// Starts watching a flag's settings key, from its value now, and its parent's.
     func watch(_ flag: some AnyFlag) {
         let isWatched = lock.withLock { watched[flag.settingsKey] != nil }
         guard !isWatched else { return }
+        if let parent = flag.parent { watch(parent) }
         let stored = settings.object(forKey: flag.settingsKey)
         let importing = (flag as? any ImportableFlag)?.importing
         lock.withLock {
             if watched[flag.settingsKey] == nil {
                 watched[flag.settingsKey] = Watched(
-                    name: flag.name, stored: stored, importing: importing)
+                    name: flag.name, parentKey: flag.parent?.settingsKey, stored: stored,
+                    importing: importing)
             }
         }
     }
@@ -123,10 +127,16 @@ final class FlagChangeSignal: @unchecked Sendable {
         // Read outside the lock, since a settings read may run other code.
         let now = keys.map { ($0, settings.object(forKey: $0)) }
         let events = lock.withLock {
-            now.compactMap { key, stored -> Event? in
+            now.compactMap { key, stored -> (key: String, event: Event)? in
                 guard let entry = watched[key], !Self.same(entry.stored, stored) else { return nil }
                 watched[key]?.stored = stored
-                return Event(name: entry.name, change: change(key: key, stored: stored))
+                return (key, Event(name: entry.name, change: change(key: key, stored: stored)))
+            }.flatMap { changed in
+                // Each watched child's value moves with its parent, so its name is sent too.
+                [changed.event]
+                    + watched.values.filter { $0.parentKey == changed.key }.map {
+                        Event(name: $0.name, change: nil)
+                    }
             }
         }
         let current = lock.withLock { Array(listeners.values) }
@@ -153,48 +163,6 @@ final class FlagChangeSignal: @unchecked Sendable {
         case (nil, nil): true
         case (let lhs?, let rhs?): (lhs as? NSObject)?.isEqual(rhs) ?? false
         default: false
-        }
-    }
-}
-
-/// Hears every `UserDefaults` change until it is freed.
-/// Unchecked because `token` is set once, before any other thread sees it.
-private final class DefaultsObserver: @unchecked Sendable {
-    private var token: (any NSObjectProtocol)?
-
-    func start(_ onChange: @escaping @Sendable () -> Void) {
-        token = NotificationCenter.default.addObserver(
-            forName: UserDefaults.didChangeNotification, object: nil, queue: nil
-        ) { _ in onChange() }
-    }
-
-    deinit {
-        if let token {
-            NotificationCenter.default.removeObserver(token)
-        }
-    }
-}
-
-/// One signal per live settings object, held weakly so a dropped store frees it.
-/// Unchecked because the lock guards `signals`.
-private final class SignalRegistry: @unchecked Sendable {
-    private struct Entry {
-        weak var signal: FlagChangeSignal?
-    }
-
-    static let shared = SignalRegistry()
-    private let lock = NSLock()
-    private var signals: [ObjectIdentifier: Entry] = [:]
-
-    func signal(for settings: any FlagSettings) -> FlagChangeSignal {
-        // The signal holds `settings`, so the identifier stays its own while the signal lives.
-        let id = ObjectIdentifier(settings as AnyObject)
-        return lock.withLock {
-            if let signal = signals[id]?.signal { return signal }
-            signals = signals.filter { $0.value.signal != nil }
-            let signal = FlagChangeSignal(settings)
-            signals[id] = Entry(signal: signal)
-            return signal
         }
     }
 }

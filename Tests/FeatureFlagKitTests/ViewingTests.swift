@@ -66,6 +66,16 @@ extension FeatureFlagKitTests {
             try screen.close()
         }
 
+        @Test func test0004_6() async throws {
+            let store = FlagStore.isolated()
+            let screen = try Screen.render { DaySuggestionsListener(store: store) }
+            let user = User(screen)
+            try await user.sees(.text("Day suggestion ready"))
+            store.set(false, for: ExampleFlags.suggestions)
+            try await user.sees(.text("No day suggestion"))
+            try screen.close()
+        }
+
         /// Runs `body` with the flag's key cleared from the standard defaults the live
         /// store reads, before and after. The serialized parent suite keeps this one at a time.
         private func withStandardDefaults(_ body: () async throws -> Void) async throws {

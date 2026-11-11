@@ -43,6 +43,7 @@ flowchart TB
     debug[11 Debug screen lists every flag and its layer<br/>Req 0005 Req 0006]:::screen
     choose(12 Pick a choice for a setting<br/>Req 0008):::action
     sync[(13 Sync hook hears the user's changes and imports values<br/>Req 0009)]:::system
+    group(14 Turn off a parent toggle<br/>Req 0010):::action
 
     developer --> define
     user --> toggle
@@ -59,6 +60,8 @@ flowchart TB
     choose --> resolve
     toggle --> sync
     sync --> view
+    user --> group
+    group --> resolve
 
     classDef persona fill:#eef2ff,stroke:#6366f1,color:#312e81,stroke-width:2px
     classDef screen fill:#f8fafc,stroke:#64748b,color:#1e293b,stroke-width:2px
@@ -83,3 +86,4 @@ Numbers match the callout table.
 | 11  | Shows each flag's value, layer and expiry day, with toggles, number fields and a confirmed "Reset all". | Screen | The user sees why a flag is on. |
 | 12  | Picks one of a setting's choices, an enum with a `String` raw value. | Action | A setting needs no code per choice. |
 | 13  | Reports each change to the user's layer with its writer, and writes imported values as imports. | System | An app syncs settings without sending imports back. |
+| 14  | Turns off a parent, which turns its children off and keeps their own settings. | Action | One switch covers a group and loses no choice. |

@@ -35,6 +35,18 @@ static let sortOrder = Flag(
     legacySettingsKey: "browse.sortOrder")
 ```
 
+### Group toggles
+
+A `Bool` flag can sit under a parent `Bool` flag. The child reads on only while the parent and the child are both on:
+
+```swift
+static let suggestions = Flag("suggestions", default: true, title: "Use suggestions")
+static let daySuggestions = Flag(
+    "daySuggestions", default: true, title: "For days", parent: suggestions)
+```
+
+While the parent is off, `resolve(_:)` returns off with `FlagOrigin.parent(_:)`, even over the child's override. `changes()` names the child when its parent changes. The child keeps its own setting under its own key, which sync carries like any flag. A group is one level deep: a parent that has a parent of its own stops the app.
+
 ## Read and toggle
 
 ```swift
@@ -119,11 +131,11 @@ struct MemoriesView: View {
 }
 ```
 
-`@FlagState` reads the environment's `flagStore`, which defaults to `FlagStore.live()`. The view redraws when the flag's toggle changes, from any store over the same settings. Set `.environment(\.flagStore, .isolated())` to give a preview or test its own store.
+`@FlagState` reads the environment's `flagStore`, which defaults to `FlagStore.live()`. The view redraws when the flag's toggle changes, from any store over the same settings, and a child redraws when its parent changes. `$child` binds the child's own setting, so an app's Settings shows it even while the parent is off. Set `.environment(\.flagStore, .isolated())` to give a preview or test its own store.
 
 ## Debug screen
 
-`FlagDebugView(catalog:)` lists every flag in the catalog. Each row shows the title, value, the layer that set it and the expiry day, which a permanent setting leaves out.
+`FlagDebugView(catalog:)` lists every flag in the catalog. Each row shows the title, value, the layer that set it and the expiry day, which a permanent setting leaves out. A child sits indented under its parent, and reads "Off, because Use suggestions is off" while the parent is off.
 
 A `Bool` flag gets a toggle for the user's layer, and an `Int` flag gets a number field. The row names that layer "user setting". Each control is disabled, with the reason, while a launch argument or environment variable sets the flag. "Reset all" asks first, then clears every user setting in the catalog.
 

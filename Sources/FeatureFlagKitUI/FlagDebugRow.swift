@@ -5,6 +5,8 @@ import SwiftUI
 protocol DebuggableFlag: AnyFlag {
     /// The flag's value as the screen shows it, and the layer that set it.
     func shown(in store: FlagStore) -> (value: String, origin: FlagOrigin)
+    /// The layer under an off parent, so an override the parent hides still shows.
+    func ownOrigin(in store: FlagStore) -> FlagOrigin
     /// A binding to the user's own setting, for a flag that holds a `Bool`.
     func userToggle(in store: FlagStore) -> Binding<Bool>?
     /// A binding to the user's own setting, for a flag that holds an `Int`.
@@ -15,6 +17,10 @@ extension Flag: DebuggableFlag {
     func shown(in store: FlagStore) -> (value: String, origin: FlagOrigin) {
         let resolution = store.resolve(self)
         return (FlagText.value(resolution.value), resolution.origin)
+    }
+
+    func ownOrigin(in store: FlagStore) -> FlagOrigin {
+        store.ownResolution(self).origin
     }
 
     func userToggle(in store: FlagStore) -> Binding<Bool>? {
@@ -52,6 +58,13 @@ enum FlagText {
         origin == .user ? "user setting" : origin.description
     }
 
+    /// The value and the layer that set it, such as "On, from user setting". A child its
+    /// parent turned off says so: "Off, because Use suggestions is off".
+    static func shown(value: String, origin: FlagOrigin) -> String {
+        origin.parentName == nil
+            ? "\(value), from \(Self.origin(origin))" : "\(value), because \(origin.description)"
+    }
+
     static func expiry(_ expires: FlagExpiry) -> String {
         "Expires " + String(format: "%04d-%02d-%02d", expires.year, expires.month, expires.day)
     }
@@ -63,33 +76,40 @@ enum FlagText {
 }
 
 /// One flag's title, value, layer and expiry day if it has one, read by VoiceOver in that order.
-/// A flag that holds a `Bool` gets a toggle for the user's layer, and one that holds an
-/// `Int` gets a number field.
+/// A `Bool` flag gets a toggle, an `Int` flag a number field, and a child sits under its parent.
 struct FlagDebugRow: View {
     let flag: any AnyFlag
     let store: FlagStore
     /// The value and layer, read by the screen so a change redraws this row. It is nil
     /// for a flag of the app's own type, which the store cannot resolve.
     let shown: (value: String, origin: FlagOrigin)?
+    /// The layer under an off parent, read by the screen beside `shown`; nil when unknown.
+    var own: FlagOrigin?
+    /// Whether the row sits under its parent's row.
+    var isChild = false
 
     var body: some View {
-        // Any layer other than the user's own or the default sits above the control.
-        let overriding = shown.map { $0.origin != .user && $0.origin != .compiledDefault } ?? false
+        // An override sits above the control and shows its reason, even under an off parent.
+        // An off parent also sits above it, named on the value line.
+        let overriding = own.map { $0 != .user && $0 != .compiledDefault } ?? false
+        let byParent = shown?.origin.parentName != nil
         VStack(alignment: .leading, spacing: 4) {
             control
-                .disabled(overriding)
+                .disabled(overriding || byParent)
             Text(
-                shown.map { "\($0.value), from \(FlagText.origin($0.origin))" } ?? FlagText.unknown)
+                shown.map { FlagText.shown(value: $0.value, origin: $0.origin) }
+                    ?? FlagText.unknown)
             // A permanent setting has no expiry day to show.
             if !flag.expires.isNever {
                 Text(FlagText.expiry(flag.expires))
                     .foregroundStyle(.secondary)
             }
-            if overriding, let shown {
-                Text(FlagText.overridden(by: shown.origin))
+            if overriding, let own {
+                Text(FlagText.overridden(by: own))
                     .foregroundStyle(.secondary)
             }
         }
+        .padding(.leading, isChild ? 20 : 0)
     }
 
     /// The control that writes the user's layer, or the bare title for a type it cannot edit.

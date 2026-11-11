@@ -1,6 +1,6 @@
 import Foundation
 
-/// Answers what each flag is and where that came from. Precedence: launch
+/// Answers what each flag is and where that came from. Precedence: an off parent, then launch
 /// argument, environment, the user's toggle, then the compiled default.
 public struct FlagStore: Sendable {
     /// The sources asked in order; the first that sets a flag wins.
@@ -41,8 +41,20 @@ public struct FlagStore: Sendable {
         return FlagStore(sources: sources, settings: settings)
     }
 
-    /// The flag's value and the source that supplied it.
+    /// The flag's value and its source. An off parent turns a child off, even over its
+    /// own override, so force the parent on too.
     public func resolve<Value: FlagValue>(_ flag: Flag<Value>) -> FlagResolution<Value> {
+        // Only a `Flag<Bool>` can name a parent, so `Value` is `Bool` whenever there is one.
+        if let parent = flag.parent, !resolve(parent).value, let off = false as? Value {
+            signal.watch(flag)
+            return FlagResolution(value: off, origin: .parent(parent))
+        }
+        return ownResolution(flag)
+    }
+
+    /// The flag's value from its own layers, ignoring its parent. A debug screen names an
+    /// override this finds, even while an off parent hides it.
+    package func ownResolution<Value: FlagValue>(_ flag: Flag<Value>) -> FlagResolution<Value> {
         signal.watch(flag)
         for source in sources {
             if let value = source.value(for: flag) {
@@ -52,7 +64,7 @@ public struct FlagStore: Sendable {
         return FlagResolution(value: flag.defaultValue, origin: .compiledDefault)
     }
 
-    /// The flag's value, from the first source that sets it.
+    /// The flag's value, as `resolve(_:)` decides it.
     public subscript<Value: FlagValue>(_ flag: Flag<Value>) -> Value {
         resolve(flag).value
     }
@@ -76,8 +88,8 @@ public struct FlagStore: Sendable {
         signal.check(key: flag.settingsKey)
     }
 
-    /// The names of flags read or set through any store over these settings
-    /// whose toggle changes, from now on, including direct `UserDefaults` writes.
+    /// The names of flags read or set through any store over these settings whose toggle
+    /// changes, including direct `UserDefaults` writes. A parent's change names its children.
     public func changes() -> AsyncStream<String> {
         signal.stream { $0.name }
     }

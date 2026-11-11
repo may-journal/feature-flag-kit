@@ -44,18 +44,24 @@ final class FlagChangeSignal: @unchecked Sendable {
         _ element: @escaping @Sendable (Event) -> Element?
     ) -> AsyncStream<Element> {
         let (stream, continuation) = AsyncStream<Element>.makeStream()
-        let id = UUID()
-        lock.withLock {
-            listeners[id] = { change in
-                if let value = element(change) {
-                    continuation.yield(value)
-                }
-            }
+        let observation = observe { change in
+            if let value = element(change) { continuation.yield(value) }
         }
-        continuation.onTermination = { [weak self] _ in
-            self?.lock.withLock { _ = self?.listeners.removeValue(forKey: id) }
-        }
+        // The stream holds its observation, so it hears changes until it ends.
+        continuation.onTermination = { _ in withExtendedLifetime(observation) {} }
         return stream
+    }
+
+    /// Calls `listener` with each change until the returned observation is freed.
+    func observe(_ listener: @escaping @Sendable (Event) -> Void) -> FlagObservation {
+        let id = UUID()
+        lock.withLock { listeners[id] = listener }
+        return FlagObservation(signal: self, id: id)
+    }
+
+    /// Stops calling the listener `id`.
+    func remove(_ id: UUID) {
+        lock.withLock { _ = listeners.removeValue(forKey: id) }
     }
 
     /// Starts watching a flag's settings key, from its value now.

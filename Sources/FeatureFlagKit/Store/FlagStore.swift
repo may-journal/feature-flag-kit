@@ -101,6 +101,14 @@ public struct FlagStore: Sendable {
         signal.importValues(values)
     }
 
+    /// Calls `onChange` with each changed flag's name, as `changes()` streams it, until the
+    /// returned observation is freed. No task waits between changes.
+    package func observeChanges(_ onChange: @escaping @Sendable (String) -> Void)
+        -> FlagObservation
+    {
+        signal.observe { onChange($0.name) }
+    }
+
     /// Equal for stores whose `changes()` hear the same writes, so a listener keeps its stream.
     package var changesID: ObjectIdentifier {
         ObjectIdentifier(signal)

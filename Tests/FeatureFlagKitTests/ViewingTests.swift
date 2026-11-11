@@ -56,6 +56,16 @@ extension FeatureFlagKitTests {
             try screen.close()
         }
 
+        @Test func test0004_5() async throws {
+            let screen = try Screen.render {
+                SwipedMemoriesScreen().environment(\.flagStore, .isolated())
+            }
+            let user = User(screen)
+            try await user.drags(.text("Page 1"), by: CGVector(dx: -220, dy: 0), speed: .slow)
+            try await user.sees(.text("Page 2"))
+            try screen.close()
+        }
+
         /// Runs `body` with the flag's key cleared from the standard defaults the live
         /// store reads, before and after. The serialized parent suite keeps this one at a time.
         private func withStandardDefaults(_ body: () async throws -> Void) async throws {

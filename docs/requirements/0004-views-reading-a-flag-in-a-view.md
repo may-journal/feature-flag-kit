@@ -30,3 +30,7 @@ views that read a flag with `@FlagState`
   - Given Tester launches with the flag's launch argument on
     - When User opens the Settings toggle bound to `$binding`
       - Then the toggle shows the user's own choice, off
+- 0004.5
+  - Given Developer shows cards that each read the flag with `@FlagState`
+    - When User drags them past half a page
+      - Then the next page shows

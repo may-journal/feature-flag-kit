@@ -41,3 +41,43 @@ struct SortSettingsScreen: View {
         }
     }
 }
+
+/// An example app's pages of cards, each reading the flag and drawn anew as the finger moves.
+/// A horizontal drag past half the page's width turns the page.
+struct SwipedMemoriesScreen: View {
+    @State private var page = 1
+    @State private var offset: CGFloat = 0
+
+    var body: some View {
+        HStack {
+            ForEach(0..<12) { card in
+                FlaggedCard(page: page, isTitled: card == 0).id("\(card)-\(offset)")
+            }
+        }
+        .frame(width: 400, height: 300)
+        .offset(x: offset)
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture()
+                .onChanged { offset = $0.translation.width }
+                .onEnded { drag in
+                    if drag.translation.width < -200 { page += 1 }
+                    offset = 0
+                })
+    }
+}
+
+/// One card, which reads the flag; the first names its page.
+private struct FlaggedCard: View {
+    let page: Int
+    let isTitled: Bool
+    @FlagState(ExampleFlags.onThisDay) private var onThisDay
+
+    var body: some View {
+        if isTitled {
+            Text(onThisDay ? "On This Day, page \(page)" : "Page \(page)")
+        } else {
+            Color.clear.frame(width: 2)
+        }
+    }
+}

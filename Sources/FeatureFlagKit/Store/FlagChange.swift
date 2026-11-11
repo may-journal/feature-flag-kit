@@ -10,17 +10,40 @@ public enum FlagRawValue: Sendable, Hashable {
     case string(String)
     case data(Data)
     case date(Date)
+    case array([FlagRawValue])
+    case dictionary([String: FlagRawValue])
 
     /// Reads a property-list value, as the user's settings or another store hand it back,
     /// or nil for a type settings cannot hold.
     public init?(propertyList: Any) {
-        switch propertyList {
-        case let text as String: self = .string(text)
-        case let data as Data: self = .data(data)
-        case let date as Date: self = .date(date)
-        case let number as NSNumber: self = Self.number(number)
-        default: return nil
+        guard let value = Self.scalar(propertyList) ?? Self.collection(propertyList) else {
+            return nil
         }
+        self = value
+    }
+
+    /// A string, data, date or number, or nil for anything else.
+    private static func scalar(_ propertyList: Any) -> FlagRawValue? {
+        switch propertyList {
+        case let text as String: .string(text)
+        case let data as Data: .data(data)
+        case let date as Date: .date(date)
+        case let number as NSNumber: Self.number(number)
+        default: nil
+        }
+    }
+
+    /// An array or dictionary whose every element reads, or nil for anything else.
+    private static func collection(_ propertyList: Any) -> FlagRawValue? {
+        if let array = propertyList as? [Any] {
+            let values = array.compactMap(FlagRawValue.init(propertyList:))
+            return values.count == array.count ? .array(values) : nil
+        }
+        if let dictionary = propertyList as? [String: Any] {
+            let values = dictionary.compactMapValues(FlagRawValue.init(propertyList:))
+            return values.count == dictionary.count ? .dictionary(values) : nil
+        }
+        return nil
     }
 
     /// The property-list value to write to the user's settings or another store.
@@ -32,6 +55,8 @@ public enum FlagRawValue: Sendable, Hashable {
         case .string(let value): value
         case .data(let value): value
         case .date(let value): value
+        case .array(let values): values.map(\.propertyList)
+        case .dictionary(let values): values.mapValues(\.propertyList)
         }
     }
 
@@ -67,5 +92,32 @@ public struct FlagChange: Sendable, Hashable {
         self.key = key
         self.rawValue = rawValue
         self.writer = writer
+    }
+}
+
+/// What an import does with a value for one flag.
+enum FlagImport: Sendable {
+    /// Store this value, which reads as the flag's type and differs from its default.
+    case store(FlagRawValue)
+    /// Remove the key, since the value is the default, so the flag follows a later release.
+    case remove
+    /// Leave the key, since the value does not read as the flag's type.
+    case skip
+}
+
+/// A flag that can judge an imported value by its own type and default.
+protocol ImportableFlag: AnyFlag {
+    /// What an import does with `raw` for this flag.
+    var importing: @Sendable (FlagRawValue) -> FlagImport { get }
+}
+
+extension Flag: ImportableFlag {
+    var importing: @Sendable (FlagRawValue) -> FlagImport {
+        let defaultValue = defaultValue
+        return { raw in
+            guard let value = Value(stored: raw.propertyList) else { return .skip }
+            guard value != defaultValue else { return .remove }
+            return FlagRawValue(propertyList: value.stored).map { .store($0) } ?? .skip
+        }
     }
 }

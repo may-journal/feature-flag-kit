@@ -30,3 +30,11 @@ changes to the user's settings
   - Given Developer shows a screen that watches the flag
     - When Developer imports the flag on from another device
       - Then the screen updates
+- 0009.5
+  - Given Developer imports a flag's default value from another device
+    - When the next release ships a new default
+      - Then the flag reads the new default
+- 0009.6
+  - Given User turned a flag on
+    - When Developer imports text for it that is neither on nor off
+      - Then the flag stays on

@@ -81,8 +81,8 @@ struct FlagDebugRow: View {
             Text(
                 shown.map { "\($0.value), from \(FlagText.origin($0.origin))" } ?? FlagText.unknown)
             // A permanent setting has no expiry day to show.
-            if let expires = flag.expires {
-                Text(FlagText.expiry(expires))
+            if !flag.expires.isNever {
+                Text(FlagText.expiry(flag.expires))
                     .foregroundStyle(.secondary)
             }
             if overriding, let shown {

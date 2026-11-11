@@ -17,6 +17,6 @@ public struct FlagCatalog: Sendable, RandomAccessCollection {
     /// The flags whose expiry day has come by `date`, in catalog order, never a setting without
     /// one. An app test can expect this to be empty, so it fails once a flag outstays its day.
     public func expired(asOf date: Date = .now) -> [any AnyFlag] {
-        filter { $0.expires?.isPassed(asOf: date) ?? false }
+        filter { $0.expires.isPassed(asOf: date) }
     }
 }

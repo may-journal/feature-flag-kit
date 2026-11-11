@@ -23,7 +23,7 @@ enum AppFlags {
 
 A toggle lives in `UserDefaults` under `flag.<name>`. Pass `legacySettingsKey` to keep a key an earlier release already wrote, so the user's choice carries over.
 
-A beta flag carries an expiry day. Leave `expires` out for a permanent setting, which the expiry test never names. An enum with a `String` raw value becomes a value by declaring the conformance, and settings store its raw value:
+A beta flag carries an expiry day. Leave `expires` out for a permanent setting: it gets `FlagExpiry.never`, which the expiry test never names. An enum with a `String` raw value becomes a value by declaring the conformance, and settings store its raw value:
 
 ```swift
 enum SortOrder: String, FlagValue {
@@ -61,10 +61,10 @@ The kit holds no cloud code. An app that copies the user's settings to another s
 
 - `userChanges(in:)` streams a `FlagChange` for each change to the user's layer.
 - Each change holds the key, the new `FlagRawValue` or nil when cleared, and its writer.
-- `importUserValues(_:)` writes values by settings key and updates watching views.
+- `importUserValues(_:)` writes values by settings key as `set` would, and updates watching views.
 - Its changes are marked `.import`, so the hook never sends them back.
 
-A sketch with iCloud key-value storage, which the app writes itself:
+A sketch with iCloud key-value storage, which the app writes itself. At launch it takes the values iCloud already holds. An app that wants to push its local values first does so before that pull.
 
 ```swift
 let flags = FlagStore.live()
@@ -83,17 +83,21 @@ Task {
 
 // Bring other devices' writes down, as imports.
 let keys = Set(AppFlags.catalog.map(\.settingsKey))
-NotificationCenter.default.addObserver(
-    forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification, object: cloud, queue: .main
-) { note in
-    let changed = note.userInfo?[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String] ?? []
+func pull(_ changed: some Sequence<String>) {
     var values: [String: FlagRawValue?] = [:]
     for key in changed where keys.contains(key) {
         values[key] = cloud.object(forKey: key).flatMap(FlagRawValue.init(propertyList:))
     }
     flags.importUserValues(values)
 }
+NotificationCenter.default.addObserver(
+    forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification, object: cloud, queue: .main
+) { note in
+    pull(note.userInfo?[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String] ?? [])
+}
 cloud.synchronize()
+// The notice reports only later changes, so take what iCloud holds now.
+pull(cloud.dictionaryRepresentation.keys)
 ```
 
 ## Use in SwiftUI

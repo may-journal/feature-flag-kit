@@ -33,7 +33,7 @@ enum SortOrder: String, FlagValue {
 struct CustomFlag: AnyFlag {
     let name = "legacyBanner"
     let title = "Legacy banner"
-    let expires: FlagExpiry? = FlagExpiry(year: 2097, month: 3, day: 1)
+    let expires = FlagExpiry(year: 2097, month: 3, day: 1)
     let settingsKey = "flag.legacyBanner"
 }
 

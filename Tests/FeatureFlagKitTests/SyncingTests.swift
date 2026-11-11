@@ -11,35 +11,35 @@ extension FeatureFlagKitTests {
     @Suite struct Syncing {
         @Test func test0009_1() async throws {
             let store = FlagStore.isolated()
-            var changes = store.userChanges(in: ExampleFlags.catalog).makeAsyncIterator()
+            let changes = store.userChanges(in: ExampleFlags.catalog)
             let screen = try Screen.render {
                 BetaSettingsScreen().environment(\.flagStore, store)
             }
             try await User(screen).taps(.role(.toggle, "Show On This Day"))
-            let change = await changes.next()
             #expect(
-                change
-                    == FlagChange(
+                await firstChanges(1, of: changes) == [
+                    FlagChange(
                         name: "onThisDay", key: "beta.onThisDay", rawValue: .bool(true),
-                        writer: .app))
+                        writer: .app)
+                ])
             try screen.close()
         }
 
         @Test func test0009_2() async throws {
             let store = FlagStore.isolated()
             store.set(5, for: ExampleFlags.gridColumns)
-            var changes = store.userChanges(in: ExampleFlags.catalog).makeAsyncIterator()
+            let changes = store.userChanges(in: ExampleFlags.catalog)
             let screen = try Screen.render {
                 FlagDebugView(catalog: ExampleFlags.catalog).environment(\.flagStore, store)
             }
             let user = User(screen)
             try await user.taps(.button("Reset all"))
             try await user.taps(.button("Reset all"))
-            let change = await changes.next()
             #expect(
-                change
-                    == FlagChange(
-                        name: "gridColumns", key: "flag.gridColumns", rawValue: nil, writer: .app))
+                await firstChanges(1, of: changes) == [
+                    FlagChange(
+                        name: "gridColumns", key: "flag.gridColumns", rawValue: nil, writer: .app)
+                ])
             try screen.close()
         }
 
@@ -49,14 +49,10 @@ extension FeatureFlagKitTests {
             let defaults = try #require(UserDefaults(suiteName: suite))
             defer { defaults.removePersistentDomain(forName: suite) }
             let store = FlagStore.live(defaults: defaults)
-            var changes = store.userChanges(in: ExampleFlags.catalog).makeAsyncIterator()
+            let changes = store.userChanges(in: ExampleFlags.catalog)
             store.importUserValues(["beta.onThisDay": .bool(true), "flag.gridColumns": .int(5)])
-            var heard: Set<FlagChange> = []
-            for _ in 0..<2 {
-                if let change = await changes.next() { heard.insert(change) }
-            }
             #expect(
-                heard == [
+                Set(await firstChanges(2, of: changes)) == [
                     FlagChange(
                         name: "onThisDay", key: "beta.onThisDay", rawValue: .bool(true),
                         writer: .import),
@@ -77,6 +73,48 @@ extension FeatureFlagKitTests {
             store.importUserValues(["beta.onThisDay": .bool(true)])
             try await user.sees(.text("On This Day"))
             try screen.close()
+        }
+
+        @Test func test0009_5() {
+            let store = FlagStore.isolated()
+            _ = store.userChanges(in: ExampleFlags.catalog)
+            store.set(true, for: ExampleFlags.onThisDay)
+            store.importUserValues(["beta.onThisDay": .bool(false)])
+            let nextRelease = Flag(
+                "onThisDay", default: true, title: "On This Day",
+                expires: ExampleFlags.onThisDay.expires, legacySettingsKey: "beta.onThisDay")
+            #expect(store[nextRelease])
+        }
+
+        @Test func test0009_6() {
+            let store = FlagStore.isolated()
+            store.set(true, for: ExampleFlags.onThisDay)
+            store.importUserValues(["beta.onThisDay": .string("maybe")])
+            #expect(store[ExampleFlags.onThisDay])
+        }
+
+        /// The first `count` changes `stream` yields, or none once two seconds pass, so a missed
+        /// change fails the test rather than hanging it.
+        private func firstChanges(_ count: Int, of stream: AsyncStream<FlagChange>) async
+            -> [FlagChange]
+        {
+            await withTaskGroup(of: [FlagChange]?.self) { group in
+                group.addTask {
+                    var heard: [FlagChange] = []
+                    for await change in stream {
+                        heard.append(change)
+                        if heard.count == count { break }
+                    }
+                    return heard
+                }
+                group.addTask {
+                    try? await Task.sleep(for: .seconds(2))
+                    return nil
+                }
+                let first = await group.next().flatMap { $0 }
+                group.cancelAll()
+                return first ?? []
+            }
         }
     }
 }

@@ -3,18 +3,27 @@ import Foundation
 /// Tells listeners each change to a watched flag's stored value, for all stores sharing settings.
 /// Unchecked because the lock guards its state.
 final class FlagChangeSignal: @unchecked Sendable {
-    /// A watched flag's name and the last stored value this signal saw.
+    /// A watched flag's name, the last stored value this signal saw, and how it imports a value.
     private struct Watched {
         let name: String
         var stored: Any?
+        let importing: (@Sendable (FlagRawValue) -> FlagImport)?
+    }
+
+    /// One change as listeners hear it. `change` is nil when the stored value is not a
+    /// property-list value, so a sync hook never mistakes it for a cleared one.
+    struct Event: Sendable {
+        let name: String
+        let change: FlagChange?
     }
 
     private let settings: any FlagSettings
     private let lock = NSLock()
-    private var listeners: [UUID: @Sendable (FlagChange) -> Void] = [:]
+    private var listeners: [UUID: @Sendable (Event) -> Void] = [:]
     private var watched: [String: Watched] = [:]
-    /// Keys an import is writing now, so a change seen on one is marked as an import.
-    private var importing: [String: Int] = [:]
+    /// The value an import is writing under each key. A change to exactly that value is an
+    /// import, and any other write to the key is the app's.
+    private var imported: [String: FlagRawValue?] = [:]
     private let observer = DefaultsObserver()
 
     init(_ settings: any FlagSettings) {
@@ -32,7 +41,7 @@ final class FlagChangeSignal: @unchecked Sendable {
 
     /// Streams each change, turned into an element by `element`, which may skip one with nil.
     func stream<Element: Sendable>(
-        _ element: @escaping @Sendable (FlagChange) -> Element?
+        _ element: @escaping @Sendable (Event) -> Element?
     ) -> AsyncStream<Element> {
         let (stream, continuation) = AsyncStream<Element>.makeStream()
         let id = UUID()
@@ -54,32 +63,50 @@ final class FlagChangeSignal: @unchecked Sendable {
         let isWatched = lock.withLock { watched[flag.settingsKey] != nil }
         guard !isWatched else { return }
         let stored = settings.object(forKey: flag.settingsKey)
+        let importing = (flag as? any ImportableFlag)?.importing
         lock.withLock {
             if watched[flag.settingsKey] == nil {
-                watched[flag.settingsKey] = Watched(name: flag.name, stored: stored)
+                watched[flag.settingsKey] = Watched(
+                    name: flag.name, stored: stored, importing: importing)
             }
         }
     }
 
-    /// Runs `write`, which sets `keys`, and reports each change to them as an import, even one
-    /// a settings notification reports before `write` returns.
-    func importing(_ keys: [String], _ write: () -> Void) {
+    /// Writes `values` by key through each watched flag as `set` would, reported as imports.
+    /// It skips a key no store watches and a value that does not read as its flag's type.
+    func importValues(_ values: [String: FlagRawValue?]) {
+        let writes = lock.withLock { values.compactMap(plannedWrite) }
         lock.withLock {
-            for key in keys {
-                importing[key, default: 0] += 1
+            for write in writes {
+                imported[write.key] = .some(write.value)
             }
         }
         defer {
             lock.withLock {
-                for key in keys {
-                    importing[key, default: 1] -= 1
-                    if importing[key] == 0 { importing[key] = nil }
+                for write in writes {
+                    imported[write.key] = nil
                 }
             }
         }
-        write()
-        for key in keys {
-            check(key: key)
+        for write in writes {
+            settings.set(write.value?.propertyList, forKey: write.key)
+        }
+        for write in writes {
+            check(key: write.key)
+        }
+    }
+
+    /// What an import writes under `key` for `raw`, where a nil value removes the key, or nil
+    /// to skip it. Call it holding the lock.
+    private func plannedWrite(key: String, raw: FlagRawValue?) -> (
+        key: String, value: FlagRawValue?
+    )? {
+        guard let importing = watched[key]?.importing else { return nil }
+        guard let raw else { return (key, nil) }
+        switch importing(raw) {
+        case .store(let value): return (key, value)
+        case .remove: return (key, nil)
+        case .skip: return nil
         }
     }
 
@@ -89,21 +116,29 @@ final class FlagChangeSignal: @unchecked Sendable {
         let keys = lock.withLock { key.map { [$0] } ?? Array(watched.keys) }
         // Read outside the lock, since a settings read may run other code.
         let now = keys.map { ($0, settings.object(forKey: $0)) }
-        let changes = lock.withLock {
-            now.compactMap { key, stored -> FlagChange? in
+        let events = lock.withLock {
+            now.compactMap { key, stored -> Event? in
                 guard let entry = watched[key], !Self.same(entry.stored, stored) else { return nil }
                 watched[key]?.stored = stored
-                return FlagChange(
-                    name: entry.name, key: key, rawValue: stored.flatMap(FlagRawValue.init),
-                    writer: importing[key] == nil ? .app : .import)
+                return Event(name: entry.name, change: change(key: key, stored: stored))
             }
         }
         let current = lock.withLock { Array(listeners.values) }
-        for change in changes {
+        for event in events {
             for listener in current {
-                listener(change)
+                listener(event)
             }
         }
+    }
+
+    /// The change to `key`, an import when an import is writing exactly `stored`. It is nil
+    /// when `stored` is not a property-list value; call it holding the lock.
+    private func change(key: String, stored: Any?) -> FlagChange? {
+        let name = watched[key]?.name ?? key
+        let raw = stored.flatMap(FlagRawValue.init(propertyList:))
+        guard stored == nil || raw != nil else { return nil }
+        let isImport = imported[key].map { $0 == raw } ?? false
+        return FlagChange(name: name, key: key, rawValue: raw, writer: isImport ? .import : .app)
     }
 
     /// Whether two property-list values are equal.

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/may-journal/feature-flag-kit/compare/v1.2.0...v1.3.0) (2026-11-11)
+
+
+### Features
+
+* **core:** optional expiry, String enum values and a user-layer sync hook ([#17](https://github.com/may-journal/feature-flag-kit/issues/17)) ([34c6717](https://github.com/may-journal/feature-flag-kit/commit/34c6717d8ec10582e27f7c15b07ee10bd62227c7))
+
 ## [1.2.0](https://github.com/may-journal/feature-flag-kit/compare/v1.1.0...v1.2.0) (2026-11-11)
 
 

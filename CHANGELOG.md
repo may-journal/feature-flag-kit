@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/may-journal/feature-flag-kit/compare/v1.3.0...v1.4.0) (2026-11-11)
+
+
+### Features
+
+* **core:** group toggles, a parent flag with child flags ([#21](https://github.com/may-journal/feature-flag-kit/issues/21)) ([771925a](https://github.com/may-journal/feature-flag-kit/commit/771925a9249133188542f02c6fadabc29fe33487))
+
 ## [1.3.0](https://github.com/may-journal/feature-flag-kit/compare/v1.2.0...v1.3.0) (2026-11-11)
 
 

@@ -2,9 +2,22 @@
 public struct FlagOrigin: Sendable, Hashable, CustomStringConvertible {
     /// A short name for the origin, such as "launch argument".
     public let description: String
+    /// The parent's name when the parent being off is what turned the flag off, otherwise nil.
+    public let parentName: String?
 
     public init(_ description: String) {
         self.description = description
+        parentName = nil
+    }
+
+    private init(offParent parent: Flag<Bool>) {
+        description = "\(parent.title) is off"
+        parentName = parent.name
+    }
+
+    /// The flag's parent, which is off, so the flag reads off whatever its own layers say.
+    public static func parent(_ parent: Flag<Bool>) -> FlagOrigin {
+        FlagOrigin(offParent: parent)
     }
 
     /// A `-flag.<name> <value>` launch argument.

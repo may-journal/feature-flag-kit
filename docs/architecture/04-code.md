@@ -86,6 +86,8 @@ classDiagram
     FlagStore --> FlagRawValue : YY
     FlagStore --> FlagCatalog : ZZ
     Flag --> FlagRawValue : AAA
+    AnyFlag --> Flag : BBB
+    FlagOrigin --> Flag : CCC
 
     style Flag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style AnyFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -134,13 +136,13 @@ Numbers on classes and letters on relationships match the callout table. See [02
 
 | #   | Description | Why |
 | --- | --- | --- |
-| 1   | [`Flag`](../../Sources/FeatureFlagKit/Definitions/Flag.swift) is one flag: name, compiled default, title, settings key and expiry day, `never` for a permanent setting. | Each flag is defined once. |
+| 1   | [`Flag`](../../Sources/FeatureFlagKit/Definitions/Flag.swift) is one flag: name, compiled default, title, settings key and expiry day, `never` for a permanent setting, and a `Bool` flag's parent. | Each flag is defined once, with its group one level deep. |
 | 2   | [`AnyFlag`](../../Sources/FeatureFlagKit/Definitions/Flag.swift) is what every flag states, whatever value it holds. | A catalog lists flags of mixed types. |
 | 3   | [`FlagValue`](../../Sources/FeatureFlagKit/Definitions/FlagValue.swift) is a type a flag holds: `Bool`, `Int`, `Double`, `String` or an enum with a `String` raw value. | Overrides arrive as text and toggles as stored values. |
 | 4   | [`FlagExpiry`](../../Sources/FeatureFlagKit/Definitions/FlagExpiry.swift) is the day a flag should be gone, from its start in UTC, or `never`. | Every machine agrees on the day. |
-| 5   | [`FlagCatalog`](../../Sources/FeatureFlagKit/Definitions/FlagCatalog.swift) is the app's list of flags, with `expired(asOf:)`. | An app test fails once a flag outstays its day. |
+| 5   | [`FlagCatalog`](../../Sources/FeatureFlagKit/Definitions/FlagCatalog.swift) is the app's list of flags, with `expired(asOf:)` and `grouped`, each child under its parent. | An app test fails once a flag outstays its day. |
 | 6   | [`FlagEncoding`](../../Sources/FeatureFlagKit/Definitions/FlagEncoding.swift) spells `-flag.<name>`, `FLAG_<NAME>` and `flag.<name>`. | Every target reads one encoding. |
-| 7   | [`FlagStore`](../../Sources/FeatureFlagKit/Store/FlagStore.swift) resolves a flag through its sources, then the default, streams changes and imports the user's values. | Precedence lives in one place. |
+| 7   | [`FlagStore`](../../Sources/FeatureFlagKit/Store/FlagStore.swift) resolves a flag through its parent, its sources, then the default, streams changes and imports the user's values. | Precedence lives in one place. |
 | 8   | [`FlagSource`](../../Sources/FeatureFlagKit/Store/FlagSource.swift) is one place a value comes from: launch arguments, environment or settings. | A later source can join without changing the store. |
 | 9   | [`FlagSettings`](../../Sources/FeatureFlagKit/Store/FlagSettings.swift) is the small key-value protocol that `UserDefaults` conforms to. | A test swaps memory in for the app's settings. |
 | 10  | [`FlagOrigin`](../../Sources/FeatureFlagKit/Store/FlagOrigin.swift) names where a value came from. | A debug screen can say why a flag is on. |
@@ -179,18 +181,18 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | R   | `InMemoryFlagSettings` conforms to `FlagSettings`. | Tests swap it in for `UserDefaults`. |
 | S   | `FlagStore.isolated()` builds a store on `InMemoryFlagSettings`. | Each test starts from the defaults. |
 | T   | `@FlagState` reads the environment's store. | The app sets the store once. |
-| U   | `@FlagState` reads its store through `WatchedFlagStore`, for its own flag. | Only that flag's changes count. |
+| U   | `@FlagState` reads its store through `WatchedFlagStore`, for its own flag and its parent. | Only those flags' changes count. |
 | V   | `@FlagState` wraps one flag definition. | The definition stays the one place a default lives. |
 | W   | `FlagWatcher` listens to a store's changes. | Every store over the same settings is heard. |
 | X   | `WatchedFlagStore` keeps one `FlagWatcher` and starts it in `update()`. | A store that hears the same changes keeps the listener. |
 | Y   | `FlagDebugView` reads the environment's store. | It shows the store the app uses. |
 | Z   | `FlagDebugView` reads its store through `WatchedFlagStore`, for every flag. | Every row stays current. |
-| AA  | `FlagDebugView` walks the catalog and resets each flag once the user confirms. | "Reset all" covers the whole list. |
+| AA  | `FlagDebugView` walks the catalog, each child indented under its parent, and resets each flag once the user confirms. | "Reset all" covers the whole list. |
 | BB  | `FlagDebugView` passes each row its value and layer. | A changed value redraws the row. |
 | CC  | `FlagDebugView` reads each flag through `DebuggableFlag`. | Flags of any value type show. |
 | DD  | `FlagDebugRow` reads and changes its flag. | `Bool` flags get a toggle and `Int` flags a number field. |
 | EE  | `FlagDebugRow` writes the user's setting to the store. | The user's layer is the one it sets. |
-| FF  | `FlagDebugRow` names the layer. | An override disables the control. |
+| FF  | `FlagDebugRow` names the layer, or the parent that is off. | An override or an off parent disables the control. |
 | GG  | `DebuggableFlag` refines `AnyFlag`. | A row still reads the title and expiry day. |
 | HH  | `DebuggableFlag` resolves through the store. | The store's precedence decides. |
 | II  | `DebuggableFlag` returns the layer. | The row says where the value came from. |
@@ -212,6 +214,8 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | YY  | `FlagStore.importUserValues(_:)` writes raw values by settings key, through each watched flag's type and default. | Values from another store land in the user's layer as `set` would write them. |
 | ZZ  | `FlagStore.userChanges(in:)` watches every flag in a catalog. | A sync hook hears flags no view has read. |
 | AAA | `Flag` reads an imported raw value as its own type and compares it with its default. | An import writes what `set` would. |
+| BBB | `AnyFlag` names the `Flag<Bool>` it sits under, or nil. | A catalog and a debug screen group children under their parent. |
+| CCC | `FlagOrigin.parent(_:)` names the parent that is off. | A debug screen says the parent turned the flag off. |
 
 ## Platforms
 

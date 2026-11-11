@@ -18,7 +18,23 @@ enum FlagDebugStory {
         "gridColumns", default: 3, title: "Grid columns",
         expires: FlagExpiry(year: 2027, month: 9, day: 30))
 
-    static let catalog = FlagCatalog([replay, mentions, onThisDay, gridColumns])
+    static let suggestions = Flag("suggestions", default: true, title: "Use suggestions")
+    static let daySuggestions = Flag(
+        "daySuggestions", default: true, title: "For days", parent: suggestions)
+    static let photoSuggestions = Flag(
+        "photoSuggestions", default: true, title: "For photos", parent: suggestions)
+
+    static let catalog = FlagCatalog([
+        replay, mentions, onThisDay, gridColumns, suggestions, daySuggestions, photoSuggestions,
+    ])
+
+    /// A store where the user turned Use suggestions off, after turning For photos off.
+    static var parentOff: FlagStore {
+        let store = FlagStore.isolated()
+        store.set(false, for: photoSuggestions)
+        store.set(false, for: suggestions)
+        return store
+    }
 
     /// A store launched with `-flag.onThisDay YES`, so On This Day's row is locked.
     static var forced: FlagStore {
@@ -81,6 +97,14 @@ enum FlagDebugStory {
 
 #Preview("FlagDebugView: number edited, dark") {
     FlagDebugStory.screen(FlagDebugStory.edited, .dark)
+}
+
+#Preview("FlagDebugView: group with its parent off") {
+    FlagDebugStory.screen(FlagDebugStory.parentOff, .light)
+}
+
+#Preview("FlagDebugView: group with its parent off, dark") {
+    FlagDebugStory.screen(FlagDebugStory.parentOff, .dark)
 }
 
 #Preview("FlagDebugView: Reset all confirmation") {

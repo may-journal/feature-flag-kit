@@ -41,9 +41,14 @@ public struct FlagStore: Sendable {
         return FlagStore(sources: sources, settings: settings)
     }
 
-    /// The flag's value and the source that supplied it.
+    /// The flag's value and the source that supplied it. A flag under a parent reads off,
+    /// from the parent, while the parent is off; otherwise its own layers decide.
     public func resolve<Value: FlagValue>(_ flag: Flag<Value>) -> FlagResolution<Value> {
         signal.watch(flag)
+        // Only a `Flag<Bool>` can name a parent, so `Value` is `Bool` whenever there is one.
+        if let parent = flag.parent, !resolve(parent).value, let off = false as? Value {
+            return FlagResolution(value: off, origin: .parent(parent))
+        }
         for source in sources {
             if let value = source.value(for: flag) {
                 return FlagResolution(value: value, origin: source.origin)

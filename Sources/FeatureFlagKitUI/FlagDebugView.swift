@@ -24,13 +24,18 @@ public struct FlagDebugView: View {
     public var body: some View {
         let store = watched.store
         // Read each value and layer here, so the list's data changes and it redraws the row.
-        let rows = catalog.flags.map { flag in
-            (flag: flag, shown: (flag as? any DebuggableFlag)?.shown(in: store))
+        // Each child follows its parent, indented.
+        let rows = catalog.grouped.map { entry in
+            (
+                flag: entry.flag, isChild: entry.isChild,
+                shown: (entry.flag as? any DebuggableFlag)?.shown(in: store)
+            )
         }
         Form {
             Section {
                 ForEach(rows, id: \.flag.settingsKey) { row in
-                    FlagDebugRow(flag: row.flag, store: store, shown: row.shown)
+                    FlagDebugRow(
+                        flag: row.flag, store: store, shown: row.shown, isChild: row.isChild)
                 }
             }
             Section {

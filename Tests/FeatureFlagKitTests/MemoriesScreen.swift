@@ -21,6 +21,16 @@ enum ExampleFlags {
     static let sortOrder = Flag(
         "sortOrder", default: SortOrder.newest, title: "Sort order",
         legacySettingsKey: "browse.sortOrder")
+
+    /// A parent setting, on by default, with a child toggle per kind of suggestion.
+    static let suggestions = Flag("suggestions", default: true, title: "Use suggestions")
+    static let daySuggestions = Flag(
+        "daySuggestions", default: true, title: "For days", parent: suggestions)
+    static let photoSuggestions = Flag(
+        "photoSuggestions", default: true, title: "For photos", parent: suggestions)
+
+    /// A list that names a child before its parent, with a flag between them.
+    static let groupCatalog = FlagCatalog([daySuggestions, gridColumns, suggestions])
 }
 
 /// The choices of the example app's sort setting, a flag value with no code of its own.

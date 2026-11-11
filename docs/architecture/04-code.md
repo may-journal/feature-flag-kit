@@ -181,7 +181,7 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | R   | `InMemoryFlagSettings` conforms to `FlagSettings`. | Tests swap it in for `UserDefaults`. |
 | S   | `FlagStore.isolated()` builds a store on `InMemoryFlagSettings`. | Each test starts from the defaults. |
 | T   | `@FlagState` reads the environment's store. | The app sets the store once. |
-| U   | `@FlagState` reads its store through `WatchedFlagStore`, for its own flag and its parent. | Only those flags' changes count. |
+| U   | `@FlagState` reads its store through `WatchedFlagStore`, for its own flag. | Only that flag's changes count, and a parent's change names its children too. |
 | V   | `@FlagState` wraps one flag definition. | The definition stays the one place a default lives. |
 | W   | `FlagWatcher` listens to a store's changes. | Every store over the same settings is heard. |
 | X   | `WatchedFlagStore` keeps one `FlagWatcher` and starts it in `update()`. | A store that hears the same changes keeps the listener. |

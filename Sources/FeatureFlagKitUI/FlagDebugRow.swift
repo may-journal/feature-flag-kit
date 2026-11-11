@@ -5,6 +5,8 @@ import SwiftUI
 protocol DebuggableFlag: AnyFlag {
     /// The flag's value as the screen shows it, and the layer that set it.
     func shown(in store: FlagStore) -> (value: String, origin: FlagOrigin)
+    /// The layer under an off parent, so an override the parent hides still shows.
+    func ownOrigin(in store: FlagStore) -> FlagOrigin
     /// A binding to the user's own setting, for a flag that holds a `Bool`.
     func userToggle(in store: FlagStore) -> Binding<Bool>?
     /// A binding to the user's own setting, for a flag that holds an `Int`.
@@ -15,6 +17,10 @@ extension Flag: DebuggableFlag {
     func shown(in store: FlagStore) -> (value: String, origin: FlagOrigin) {
         let resolution = store.resolve(self)
         return (FlagText.value(resolution.value), resolution.origin)
+    }
+
+    func ownOrigin(in store: FlagStore) -> FlagOrigin {
+        store.ownResolution(self).origin
     }
 
     func userToggle(in store: FlagStore) -> Binding<Bool>? {
@@ -77,17 +83,19 @@ struct FlagDebugRow: View {
     /// The value and layer, read by the screen so a change redraws this row. It is nil
     /// for a flag of the app's own type, which the store cannot resolve.
     let shown: (value: String, origin: FlagOrigin)?
+    /// The layer under an off parent, read by the screen beside `shown`; nil when unknown.
+    var own: FlagOrigin?
     /// Whether the row sits under its parent's row.
     var isChild = false
 
     var body: some View {
-        // Any layer other than the user's own or the default sits above the control,
-        // and so does a parent that is off.
-        let overriding = shown.map { $0.origin != .user && $0.origin != .compiledDefault } ?? false
+        // An override sits above the control and shows its reason, even under an off parent.
+        // An off parent also sits above it, named on the value line.
+        let overriding = own.map { $0 != .user && $0 != .compiledDefault } ?? false
         let byParent = shown?.origin.parentName != nil
         VStack(alignment: .leading, spacing: 4) {
             control
-                .disabled(overriding)
+                .disabled(overriding || byParent)
             Text(
                 shown.map { FlagText.shown(value: $0.value, origin: $0.origin) }
                     ?? FlagText.unknown)
@@ -96,9 +104,8 @@ struct FlagDebugRow: View {
                 Text(FlagText.expiry(flag.expires))
                     .foregroundStyle(.secondary)
             }
-            // The value line already names an off parent as the reason.
-            if overriding, !byParent, let shown {
-                Text(FlagText.overridden(by: shown.origin))
+            if overriding, let own {
+                Text(FlagText.overridden(by: own))
                     .foregroundStyle(.secondary)
             }
         }

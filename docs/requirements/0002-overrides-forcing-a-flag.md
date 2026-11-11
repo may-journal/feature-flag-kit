@@ -38,3 +38,7 @@ flag reads with an override
   - Given Tester mistypes the environment variable while the user's toggle is on
     - When the app shows its screen
       - Then the user's toggle decides
+- 0002.7
+  - Given Tester forces a child off, while its parent is off
+    - When the debug screen shows the child's row
+      - Then the row still names the launch argument

@@ -45,7 +45,7 @@ static let daySuggestions = Flag(
     "daySuggestions", default: true, title: "For days", parent: suggestions)
 ```
 
-While the parent is off, `resolve(_:)` returns off with `FlagOrigin.parent(_:)`. The child keeps its own setting under its own key, so the parent coming back on restores it. Sync carries it like any flag. A group is one level deep: a parent that has a parent of its own stops the app.
+While the parent is off, `resolve(_:)` returns off with `FlagOrigin.parent(_:)`, even over the child's override. `changes()` names the child when its parent changes. The child keeps its own setting under its own key, which sync carries like any flag. A group is one level deep: a parent that has a parent of its own stops the app.
 
 ## Read and toggle
 

@@ -1,4 +1,6 @@
 import FeatureFlagKit
+import FeatureFlagKitUI
+import SwiftUI
 import Testing
 import UITestingLibrary
 
@@ -43,6 +45,19 @@ extension FeatureFlagKitTests {
                 arguments: ["-flag.onThisDay", "Y"], environment: ["FLAG_ON_THIS_DAY": "NO"])
             try await expectOnThisDay(shown: false, on: launched)
             #expect(launched.resolve(flag).origin == .environment)
+        }
+
+        @Test func test0002_7() async throws {
+            let child = ExampleFlags.daySuggestions
+            let store = FlagStore.isolated(arguments: FlagEncoding.arguments(child, false))
+            store.set(false, for: ExampleFlags.suggestions)
+            let screen = try Screen.render {
+                FlagDebugView(catalog: FlagCatalog([ExampleFlags.suggestions, child]))
+                    .environment(\.flagStore, store)
+            }
+            try await User(screen).sees(
+                .text("Set by the launch argument, which beats this setting."))
+            try screen.close()
         }
 
         @Test func test0002_6() async throws {

@@ -23,13 +23,20 @@ public struct FlagCatalog: Sendable, RandomAccessCollection {
     /// Every flag with each listed child moved right under its parent, as a debug screen shows
     /// them. A child whose parent the catalog doesn't list stays where the app put it.
     public var grouped: [(flag: any AnyFlag, isChild: Bool)] {
-        let listed = Set(map(\.name))
-        let isListedChild = { (flag: any AnyFlag) in
-            flag.parent.map { listed.contains($0.name) } ?? false
+        // Parents are matched by settings key, the one thing no two listed flags share.
+        let listed = Set(map(\.settingsKey))
+        var children: [String: [any AnyFlag]] = [:]
+        var tops: [any AnyFlag] = []
+        for flag in flags {
+            if let key = flag.parent?.settingsKey, listed.contains(key) {
+                children[key, default: []].append(flag)
+            } else {
+                tops.append(flag)
+            }
         }
-        return flags.filter { !isListedChild($0) }.flatMap { flag in
+        return tops.flatMap { flag in
             [(flag: flag, isChild: false)]
-                + flags.filter { $0.parent?.name == flag.name }.map { (flag: $0, isChild: true) }
+                + (children[flag.settingsKey] ?? []).map { (flag: $0, isChild: true) }
         }
     }
 }

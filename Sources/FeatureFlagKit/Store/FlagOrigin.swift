@@ -6,18 +6,17 @@ public struct FlagOrigin: Sendable, Hashable, CustomStringConvertible {
     public let parentName: String?
 
     public init(_ description: String) {
-        self.description = description
-        parentName = nil
+        self.init(description: description, parentName: nil)
     }
 
-    private init(offParent parent: Flag<Bool>) {
-        description = "\(parent.title) is off"
-        parentName = parent.name
+    private init(description: String, parentName: String?) {
+        self.description = description
+        self.parentName = parentName
     }
 
     /// The flag's parent, which is off, so the flag reads off whatever its own layers say.
     public static func parent(_ parent: Flag<Bool>) -> FlagOrigin {
-        FlagOrigin(offParent: parent)
+        FlagOrigin(description: "\(parent.title) is off", parentName: parent.name)
     }
 
     /// A `-flag.<name> <value>` launch argument.

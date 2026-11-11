@@ -12,12 +12,11 @@ public struct FlagState<Value: FlagValue>: @MainActor DynamicProperty {
     private var watched: WatchedFlagStore
     private let definition: Flag<Value>
 
-    /// Reads `definition`, the flag the app defined once in its catalog. A child also redraws
-    /// when its parent changes.
+    /// Reads `definition`, the flag the app defined once in its catalog. The store names a
+    /// child as changed when its parent changes, so a child redraws then too.
     public init(_ definition: Flag<Value>) {
         self.definition = definition
-        let parent = definition.parent.map { [$0.name] } ?? []
-        watched = WatchedFlagStore(names: Set([definition.name] + parent))
+        watched = WatchedFlagStore(name: definition.name)
     }
 
     /// The flag's value, from the first layer that sets it, and off while its parent is off.

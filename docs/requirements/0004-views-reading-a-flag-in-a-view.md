@@ -34,3 +34,7 @@ views that read a flag with `@FlagState`
   - Given Developer shows cards that each read the flag with `@FlagState`
     - When User drags them past half a page
       - Then the next page shows
+- 0004.6
+  - Given Developer shows a screen that hears the store's changes to a child by name
+    - When User turns the parent off
+      - Then the screen updates

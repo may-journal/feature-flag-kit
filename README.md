@@ -82,7 +82,7 @@ settings:
       FLAG_ENVIRONMENT: production
 ```
 
-With no key, or a value it doesn't know, `FlagStore.live()` picks `debug` in a build compiled with `DEBUG` and `production` otherwise. A test passes the environment straight in, `FlagStore.isolated(in: .production)` or `FlagStore.live(in: .internal)`; `isolated()` alone is `debug`. The type is not named `Environment`, so it never clashes with SwiftUI's.
+With no key, `FlagStore.live()` picks `debug` in a build compiled with `DEBUG` and `production` otherwise. A value it doesn't know, such as an unset build setting, reads `production`. A test passes the environment straight in, `FlagStore.isolated(in: .production)` or `FlagStore.live(in: .internal)`; `isolated()` alone is `debug`. The type is not named `Environment`, so it never clashes with SwiftUI's.
 
 ## Read and toggle
 

@@ -65,23 +65,27 @@ public struct FlagStore: Sendable {
     /// Whether `flag` ships in this store's environment, and its parent too, so an app's
     /// Settings shows its toggle only then.
     public func isAvailable(_ flag: any AnyFlag) -> Bool {
-        flag.availability.contains(environment)
-            && (flag.parent.map { $0.availability.contains(environment) } ?? true)
+        flag.ships(in: environment) && (flag.parent?.ships(in: environment) ?? true)
     }
 
-    /// The flag's value and its source; a flag missing from this environment reads its compiled
-    /// default. A parent that is off or missing turns a child off, even over the child's override.
+    /// The flag's value and its source: off under an off or missing parent, even over an
+    /// override. A flag missing from this build reads its compiled default.
     public func resolve<Value: FlagValue>(_ flag: Flag<Value>) -> FlagResolution<Value> {
-        guard flag.availability.contains(environment) else {
+        // Only a `Flag<Bool>` can name a parent, so `Value` is `Bool` whenever there is one.
+        if let parent = flag.parent, let off = false as? Value {
+            if !parent.ships(in: environment) {
+                signal.watch(flag)
+                return FlagResolution(
+                    value: off, origin: .parentUnavailable(parent, in: environment))
+            }
+            if !resolve(parent).value {
+                signal.watch(flag)
+                return FlagResolution(value: off, origin: .parent(parent))
+            }
+        }
+        guard flag.ships(in: environment) else {
             signal.watch(flag)
             return FlagResolution(value: flag.defaultValue, origin: .unavailable(in: environment))
-        }
-        // Only a `Flag<Bool>` can name a parent, so `Value` is `Bool` whenever there is one.
-        if let parent = flag.parent, !isAvailable(parent) || !resolve(parent).value,
-            let off = false as? Value
-        {
-            signal.watch(flag)
-            return FlagResolution(value: off, origin: .parent(parent))
         }
         return ownResolution(flag)
     }
@@ -106,11 +110,11 @@ public struct FlagStore: Sendable {
         resolve(flag).value
     }
 
-    /// Saves the user's toggle, which an override still beats. The default for this
-    /// environment, or nil, removes the key, so the flag follows a later release's default.
+    /// Saves the user's toggle, which an override still beats. A value that is the default in
+    /// every environment, or nil, removes the key, so the flag follows a later release's default.
     public func set<Value: FlagValue>(_ value: Value?, for flag: Flag<Value>) {
         signal.watch(flag)
-        if let value, value != flag.defaultValue(in: environment) {
+        if let value, !flag.everyDefault.allSatisfy({ $0 == value }) {
             settings.set(value.stored, forKey: flag.settingsKey)
         } else {
             settings.removeObject(forKey: flag.settingsKey)
@@ -147,7 +151,7 @@ public struct FlagStore: Sendable {
     /// Writes another store's values by settings key, as `set` would, with nil to clear one.
     /// Each change is an import; a key no store watches, or a value of another type, is skipped.
     public func importUserValues(_ values: [String: FlagRawValue?]) {
-        signal.importValues(values, in: environment)
+        signal.importValues(values)
     }
 
     /// Calls `onChange` with each changed flag's name, as `changes()` streams it, until the

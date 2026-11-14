@@ -75,6 +75,19 @@ public struct Flag<Value: FlagValue>: AnyFlag {
     public func defaultValue(in environment: FlagEnvironment) -> Value {
         environmentDefaults[environment] ?? defaultValue
     }
+
+    /// The compiled default and each environment's default. A saved value equal to all of
+    /// them needs no key, on this device or any device that syncs with it.
+    var everyDefault: [Value] {
+        [defaultValue] + environmentDefaults.values
+    }
+}
+
+extension AnyFlag {
+    /// Whether the flag itself ships in `environment`, whatever its parent says.
+    public func ships(in environment: FlagEnvironment) -> Bool {
+        availability.contains(environment)
+    }
 }
 
 extension Flag where Value == Bool {

@@ -19,6 +19,15 @@ public struct FlagOrigin: Sendable, Hashable, CustomStringConvertible {
         FlagOrigin(description: "\(parent.title) is off", parentName: parent.name)
     }
 
+    /// The flag's parent doesn't ship in this environment, so the flag reads off.
+    public static func parentUnavailable(_ parent: Flag<Bool>, in environment: FlagEnvironment)
+        -> FlagOrigin
+    {
+        FlagOrigin(
+            description: "\(parent.title) is not available in \(environment)",
+            parentName: parent.name)
+    }
+
     /// The flag doesn't ship in this environment, so it reads its compiled default.
     public static func unavailable(in environment: FlagEnvironment) -> FlagOrigin {
         FlagOrigin("not available in \(environment)")

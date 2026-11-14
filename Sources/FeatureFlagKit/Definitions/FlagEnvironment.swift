@@ -19,12 +19,14 @@ public enum FlagEnvironment: String, Sendable, Hashable, CaseIterable, CustomStr
     /// They can't in production, where only the user's own settings change a flag.
     public var takesOverrides: Bool { self != .production }
 
-    /// The environment `bundle` names under `infoPlistKey`, or, when it names none, debug
-    /// in a `DEBUG` build and production otherwise.
+    /// The environment `bundle` names under `infoPlistKey`, or production for an unknown value.
+    /// With no key, it is debug in a `DEBUG` build and production otherwise.
     static func reading(_ bundle: Bundle) -> (FlagEnvironment, FlagEnvironmentSource) {
-        if let text = bundle.object(forInfoDictionaryKey: infoPlistKey) as? String,
-            let named = FlagEnvironment(rawValue: text)
-        {
+        if let value = bundle.object(forInfoDictionaryKey: infoPlistKey) {
+            // A typo or an unset build setting shows the fewest flags, and says why.
+            guard let named = (value as? String).flatMap(FlagEnvironment.init(rawValue:)) else {
+                return (.production, .unknownInfoPlistValue)
+            }
             return (named, .infoPlist)
         }
         #if DEBUG
@@ -39,6 +41,8 @@ public enum FlagEnvironment: String, Sendable, Hashable, CaseIterable, CustomStr
 public enum FlagEnvironmentSource: String, Sendable, Hashable, CustomStringConvertible {
     /// The app's Info.plist key.
     case infoPlist = "Info.plist"
+    /// An Info.plist value that names no environment, such as an unset build setting.
+    case unknownInfoPlistValue = "an Info.plist value it doesn't know"
     /// No key, in a build compiled with `DEBUG`.
     case debugBuild = "a Debug build"
     /// No key, in a build compiled without `DEBUG`.

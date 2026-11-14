@@ -30,3 +30,7 @@ builds
   - Given Developer sets the Info.plist key to internal
     - When User opens the debug screen
       - Then it reads "Environment: internal, from Info.plist"
+- 0011.5
+  - Given Developer sets the Info.plist key to a build setting left unset
+    - When a Debug build starts
+      - Then the store's environment is production

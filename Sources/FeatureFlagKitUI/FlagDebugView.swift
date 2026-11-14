@@ -51,7 +51,8 @@ public struct FlagDebugView: View {
                         titleVisibility: .visible
                     ) {
                         Button(Self.resetAll, role: .destructive) {
-                            for flag in catalog {
+                            // A flag this build hides keeps its saved value.
+                            for flag in catalog where store.isAvailable(flag) {
                                 store.reset(flag)
                             }
                         }

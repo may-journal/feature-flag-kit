@@ -105,18 +105,18 @@ enum FlagImport: Sendable {
     case skip
 }
 
-/// A flag that can judge an imported value by its own type and its default in an environment.
+/// A flag that can judge an imported value by its own type and defaults.
 protocol ImportableFlag: AnyFlag {
-    /// What an import does with `raw` for this flag, in the importing store's environment.
-    var importing: @Sendable (FlagRawValue, FlagEnvironment) -> FlagImport { get }
+    /// What an import does with `raw` for this flag.
+    var importing: @Sendable (FlagRawValue) -> FlagImport { get }
 }
 
 extension Flag: ImportableFlag {
-    var importing: @Sendable (FlagRawValue, FlagEnvironment) -> FlagImport {
-        let flag = self
-        return { raw, environment in
+    var importing: @Sendable (FlagRawValue) -> FlagImport {
+        let defaults = everyDefault
+        return { raw in
             guard let value = Value(stored: raw.propertyList) else { return .skip }
-            guard value != flag.defaultValue(in: environment) else { return .remove }
+            guard !defaults.allSatisfy({ $0 == value }) else { return .remove }
             return FlagRawValue(propertyList: value.stored).map { .store($0) } ?? .skip
         }
     }

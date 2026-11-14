@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/may-journal/feature-flag-kit/compare/v1.4.0...v1.5.0) (2026-11-14)
+
+
+### Features
+
+* **core:** ship each flag in the environments it names ([#25](https://github.com/may-journal/feature-flag-kit/issues/25)) ([600fc6b](https://github.com/may-journal/feature-flag-kit/commit/600fc6b465dafcf213161959b4d85b336905b934))
+
 ## [1.4.0](https://github.com/may-journal/feature-flag-kit/compare/v1.3.0...v1.4.0) (2026-11-11)
 
 

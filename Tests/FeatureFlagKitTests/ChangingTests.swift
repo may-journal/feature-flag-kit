@@ -57,6 +57,22 @@ extension FeatureFlagKitTests {
             try screen.close()
         }
 
+        @Test func test0006_5() async throws {
+            let store = FlagStore.isolated(in: .production)
+            store.set(true, for: ExampleFlags.mentions)
+            store.set(5, for: ExampleFlags.gridColumns)
+            let catalog = FlagCatalog([ExampleFlags.gridColumns, ExampleFlags.mentions])
+            let screen = try Screen.render {
+                FlagDebugView(catalog: catalog).environment(\.flagStore, store)
+            }
+            let user = User(screen)
+            try await confirmResetAll(user)
+            try await user.sees(.text("3, from default"))
+            let saved = store.settings.object(forKey: ExampleFlags.mentions.settingsKey)
+            #expect(saved as? Bool == true)
+            try screen.close()
+        }
+
         /// Taps "Reset all", then the dialog's own "Reset all", which covers the screen.
         private func confirmResetAll(_ user: User) async throws {
             try await user.taps(.button("Reset all"))

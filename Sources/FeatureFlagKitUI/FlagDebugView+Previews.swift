@@ -8,9 +8,11 @@ enum FlagDebugStory {
     static let replay = Flag(
         "replay", default: false, title: "Replay",
         expires: FlagExpiry(year: 2027, month: 3, day: 1))
+    /// A beta that ships in debug and internal builds only, and starts on in debug.
     static let mentions = Flag(
         "mentions", default: false, title: "Mentions",
-        expires: FlagExpiry(year: 2027, month: 5, day: 15))
+        expires: FlagExpiry(year: 2027, month: 5, day: 15), availability: [.debug, .internal],
+        environmentDefaults: [.debug: true])
     static let onThisDay = Flag(
         "onThisDay", default: false, title: "On This Day",
         expires: FlagExpiry(year: 2027, month: 6, day: 1))
@@ -39,6 +41,11 @@ enum FlagDebugStory {
     /// A store launched with `-flag.onThisDay YES`, so On This Day's row is locked.
     static var forced: FlagStore {
         .isolated(arguments: FlagEncoding.arguments(onThisDay, true))
+    }
+
+    /// A production store, where Mentions has no row.
+    static var production: FlagStore {
+        .isolated(in: .production)
     }
 
     /// A store where the user turned Replay on.
@@ -105,6 +112,14 @@ enum FlagDebugStory {
 
 #Preview("FlagDebugView: group with its parent off, dark") {
     FlagDebugStory.screen(FlagDebugStory.parentOff, .dark)
+}
+
+#Preview("FlagDebugView: production build") {
+    FlagDebugStory.screen(FlagDebugStory.production, .light)
+}
+
+#Preview("FlagDebugView: production build, dark") {
+    FlagDebugStory.screen(FlagDebugStory.production, .dark)
 }
 
 #Preview("FlagDebugView: Reset all confirmation") {

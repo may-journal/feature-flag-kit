@@ -30,6 +30,20 @@ struct BetaSettingsScreen: View {
     }
 }
 
+/// An example app's Settings screen, which shows the Mentions toggle only in a build that ships it.
+struct BetaFeaturesScreen: View {
+    @FlagState(ExampleFlags.mentions) private var mentions
+
+    var body: some View {
+        Form {
+            Text("Beta features")
+            if _mentions.isAvailable {
+                Toggle("Show Mentions", isOn: $mentions)
+            }
+        }
+    }
+}
+
 /// An example app's day screen, which offers a suggestion while its child flag reads on.
 /// Its own Settings toggle writes the child's saved setting, whatever the parent says.
 struct DaySuggestionsScreen: View {

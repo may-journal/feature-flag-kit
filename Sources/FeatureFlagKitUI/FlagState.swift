@@ -28,4 +28,10 @@ public struct FlagState<Value: FlagValue>: @MainActor DynamicProperty {
     public var projectedValue: Binding<Value> {
         watched.store.userBinding(for: definition)
     }
+
+    /// Whether the flag ships in this build, so the app's Settings shows its toggle only then.
+    /// Read it through the wrapper itself, as `_onThisDay.isAvailable`.
+    public var isAvailable: Bool {
+        watched.store.isAvailable(definition)
+    }
 }

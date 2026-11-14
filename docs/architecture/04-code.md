@@ -32,6 +32,8 @@ classDiagram
     class FlagChange["23 FlagChange"]
     class FlagRawValue["24 FlagRawValue"]
     class FlagWriter["25 FlagWriter"]
+    class FlagEnvironment["26 FlagEnvironment"]
+    class FlagEnvironmentSource["27 FlagEnvironmentSource"]
 
     Flag ..|> AnyFlag : A
     Flag --> FlagExpiry : B
@@ -88,6 +90,12 @@ classDiagram
     Flag --> FlagRawValue : AAA
     AnyFlag --> Flag : BBB
     FlagOrigin --> Flag : CCC
+    Flag --> FlagEnvironment : DDD
+    FlagStore --> FlagEnvironment : EEE
+    FlagStore --> FlagEnvironmentSource : FFF
+    FlagEnvironment --> FlagEnvironmentSource : GGG
+    AnyFlag --> FlagEnvironment : HHH
+    FlagOrigin --> FlagEnvironment : III
 
     style Flag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style AnyFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -114,6 +122,8 @@ classDiagram
     style FlagChange fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagRawValue fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagWriter fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style FlagEnvironment fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style FlagEnvironmentSource fill:#6d28d9,stroke:#4c1d95,color:#ffffff
 ```
 
 ```mermaid
@@ -136,22 +146,22 @@ Numbers on classes and letters on relationships match the callout table. See [02
 
 | #   | Description | Why |
 | --- | --- | --- |
-| 1   | [`Flag`](../../Sources/FeatureFlagKit/Definitions/Flag.swift) is one flag: name, compiled default, title, settings key and expiry day, `never` for a permanent setting, and a `Bool` flag's parent. | Each flag is defined once, with its group one level deep. |
+| 1   | [`Flag`](../../Sources/FeatureFlagKit/Definitions/Flag.swift) is one flag: name, compiled default, title, settings key and expiry day, `never` for a permanent setting, a `Bool` flag's parent, and its environments. | Each flag is defined once, with its group one level deep. |
 | 2   | [`AnyFlag`](../../Sources/FeatureFlagKit/Definitions/Flag.swift) is what every flag states, whatever value it holds. | A catalog lists flags of mixed types. |
 | 3   | [`FlagValue`](../../Sources/FeatureFlagKit/Definitions/FlagValue.swift) is a type a flag holds: `Bool`, `Int`, `Double`, `String` or an enum with a `String` raw value. | Overrides arrive as text and toggles as stored values. |
 | 4   | [`FlagExpiry`](../../Sources/FeatureFlagKit/Definitions/FlagExpiry.swift) is the day a flag should be gone, from its start in UTC, or `never`. | Every machine agrees on the day. |
 | 5   | [`FlagCatalog`](../../Sources/FeatureFlagKit/Definitions/FlagCatalog.swift) is the app's list of flags, with `expired(asOf:)` and `grouped`, each child under its parent. | An app test fails once a flag outstays its day. |
 | 6   | [`FlagEncoding`](../../Sources/FeatureFlagKit/Definitions/FlagEncoding.swift) spells `-flag.<name>`, `FLAG_<NAME>` and `flag.<name>`. | Every target reads one encoding. |
-| 7   | [`FlagStore`](../../Sources/FeatureFlagKit/Store/FlagStore.swift) resolves a flag through its parent, its sources, then the default, streams changes and imports the user's values. | Precedence lives in one place. |
+| 7   | [`FlagStore`](../../Sources/FeatureFlagKit/Store/FlagStore.swift) resolves a flag through its environment, its parent, its sources, then the defaults, streams changes and imports the user's values. | Precedence lives in one place. |
 | 8   | [`FlagSource`](../../Sources/FeatureFlagKit/Store/FlagSource.swift) is one place a value comes from: launch arguments, environment or settings. | A later source can join without changing the store. |
 | 9   | [`FlagSettings`](../../Sources/FeatureFlagKit/Store/FlagSettings.swift) is the small key-value protocol that `UserDefaults` conforms to. | A test swaps memory in for the app's settings. |
 | 10  | [`FlagOrigin`](../../Sources/FeatureFlagKit/Store/FlagOrigin.swift) names where a value came from. | A debug screen can say why a flag is on. |
 | 11  | [`FlagResolution`](../../Sources/FeatureFlagKit/Store/FlagOrigin.swift) pairs a value with its origin. | The value and its origin travel together. |
 | 12  | [`InMemoryFlagSettings`](../../Sources/FeatureFlagKit/Store/FlagSettings.swift) keeps toggles in memory. | A test gets fresh toggles with nothing to wipe. |
 | 13  | [`flagStore`](../../Sources/FeatureFlagKitUI/FlagStoreEnvironment.swift) is the environment's store, `FlagStore.live()` by default. | A preview or test swaps in its own store. |
-| 14  | [`FlagState`](../../Sources/FeatureFlagKitUI/FlagState.swift) is the `@FlagState` property wrapper, with `$binding` for the user's toggle. | A view reads a flag in one line. |
+| 14  | [`FlagState`](../../Sources/FeatureFlagKitUI/FlagState.swift) is the `@FlagState` property wrapper, with `$binding` for the user's toggle and `isAvailable` for the build. | A view reads a flag in one line. |
 | 15  | [`FlagWatcher`](../../Sources/FeatureFlagKitUI/FlagWatcher.swift) counts the store's changes through one callback, with no task waiting between them. | A view that reads the count redraws on each change, and a gesture or scroll beside it is never held up. |
-| 16  | [`FlagDebugView`](../../Sources/FeatureFlagKitUI/FlagDebugView.swift) lists the catalog's flags, with "Reset all" behind a confirmation. | One screen says why each flag is on, and a slip clears nothing. |
+| 16  | [`FlagDebugView`](../../Sources/FeatureFlagKitUI/FlagDebugView.swift) names the environment and lists the catalog's flags this build ships, with "Reset all" behind a confirmation. | One screen says why each flag is on, and a slip clears nothing. |
 | 17  | [`FlagDebugRow`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) shows a flag's value, layer and expiry day, and its toggle or number field. | An override disables the control and says why. |
 | 18  | [`DebuggableFlag`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) reads any `Flag` without its value type. | A catalog holds flags of mixed types. |
 | 19  | [`WatchedFlagStore`](../../Sources/FeatureFlagKitUI/FlagWatcher.swift) is the environment's store, watched from `update()`. | No view starts a listener while it draws. |
@@ -161,6 +171,8 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 23  | [`FlagChange`](../../Sources/FeatureFlagKit/Store/FlagChange.swift) is one change to the user's layer: name, key, new value and writer. | A sync hook copies it to another store. |
 | 24  | [`FlagRawValue`](../../Sources/FeatureFlagKit/Store/FlagChange.swift) is a stored value that crosses threads and compares equal. | Another store reads and writes property-list values. |
 | 25  | [`FlagWriter`](../../Sources/FeatureFlagKit/Store/FlagChange.swift) says whether the app or an import wrote a change. | A sync hook never sends an import back. |
+| 26  | [`FlagEnvironment`](../../Sources/FeatureFlagKit/Definitions/FlagEnvironment.swift) is who a build is for: debug, internal or production, read from the `FeatureFlagEnvironment` Info.plist key. | The system can't tell TestFlight apart reliably, so the app says. |
+| 27  | [`FlagEnvironmentSource`](../../Sources/FeatureFlagKit/Definitions/FlagEnvironment.swift) is where the environment came from: Info.plist, a Debug or release build, or the app. | The debug screen says why the build is what it is. |
 | A   | `Flag` conforms to `AnyFlag`. | The catalog holds any flag. |
 | B   | `Flag` carries its expiry day, `never` for a setting. | Expiry is part of the definition. |
 | C   | `Flag` asks `FlagEncoding` for its default settings key. | One encoding for all keys. |
@@ -216,7 +228,12 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | AAA | `Flag` reads an imported raw value as its own type and compares it with its default. | An import writes what `set` would. |
 | BBB | `AnyFlag` names the `Flag<Bool>` it sits under, or nil. | A catalog and a debug screen group children under their parent. |
 | CCC | `FlagOrigin.parent(_:)` names the parent that is off. | A debug screen says the parent turned the flag off. |
-
+| DDD | `Flag` lists the environments it ships in and its default in each. | A beta stays out of production without `#if`. |
+| EEE | `FlagStore` holds one environment, which picks the flags it ships and whether overrides apply. | Production takes only the user's settings. |
+| FFF | `FlagStore` keeps where its environment came from. | `FlagDebugView` names it. |
+| GGG | `FlagEnvironment` reads the Info.plist key, or falls back by the `DEBUG` condition. | A build with no key still has an environment. |
+| HHH | `AnyFlag` names the environments a flag ships in, every one for the app's own type. | A debug screen hides any flag the build doesn't ship. |
+| III | `FlagOrigin` names the environment a flag is missing from, or whose default it read. | A debug screen says why. |
 ## Platforms
 
 iOS 26 and macOS 26 and later, built with Swift tools 6.2 in the Swift 6 language mode.

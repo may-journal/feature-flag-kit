@@ -30,3 +30,7 @@ number flags in the app's catalog
   - Given Tester launches with a flag's launch argument on
     - When User confirms Reset all
       - Then that flag stays on, from the launch argument
+- 0006.5
+  - Given User saved a setting for a flag this build doesn't ship
+    - When User confirms Reset all
+      - Then that saved setting stays

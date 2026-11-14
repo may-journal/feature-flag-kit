@@ -31,6 +31,19 @@ enum ExampleFlags {
 
     /// A list that names a child before its parent, with a flag between them.
     static let groupCatalog = FlagCatalog([daySuggestions, gridColumns, suggestions])
+
+    /// A beta that ships in debug and internal builds only, and starts on in internal ones.
+    static let mentions = Flag(
+        "mentions", default: false, title: "Mentions", availability: [.debug, .internal],
+        environmentDefaults: [.internal: true])
+
+    /// A setting in every build that starts on in production.
+    static let tips = Flag(
+        "tips", default: false, title: "Tips", environmentDefaults: [.production: true])
+
+    /// A parent that ships in debug builds only, over a child that ships in every build.
+    static let labs = Flag("labs", default: true, title: "Labs", availability: [.debug])
+    static let labsSearch = Flag("labsSearch", default: true, title: "Search", parent: labs)
 }
 
 /// The choices of the example app's sort setting, a flag value with no code of its own.

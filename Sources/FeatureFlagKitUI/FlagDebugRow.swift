@@ -65,6 +65,11 @@ enum FlagText {
             ? "\(value), from \(Self.origin(origin))" : "\(value), because \(origin.description)"
     }
 
+    /// Who the build is for and why, such as "Environment: internal, from Info.plist".
+    static func environment(of store: FlagStore) -> String {
+        "Environment: \(store.environment), from \(store.environmentSource)"
+    }
+
     static func expiry(_ expires: FlagExpiry) -> String {
         "Expires " + String(format: "%04d-%02d-%02d", expires.year, expires.month, expires.day)
     }
@@ -91,7 +96,7 @@ struct FlagDebugRow: View {
     var body: some View {
         // An override sits above the control and shows its reason, even under an off parent.
         // An off parent also sits above it, named on the value line.
-        let overriding = own.map { $0 != .user && $0 != .compiledDefault } ?? false
+        let overriding = own?.isOverride ?? false
         let byParent = shown?.origin.parentName != nil
         VStack(alignment: .leading, spacing: 4) {
             control

@@ -44,6 +44,7 @@ flowchart TB
     choose(12 Pick a choice for a setting<br/>Req 0008):::action
     sync[(13 Sync hook hears the user's changes and imports values<br/>Req 0009)]:::system
     group(14 Turn off a parent toggle<br/>Req 0010):::action
+    environment(15 Declare the build's environment and each flag's builds<br/>Req 0011 Req 0012):::action
 
     developer --> define
     user --> toggle
@@ -62,6 +63,8 @@ flowchart TB
     sync --> view
     user --> group
     group --> resolve
+    developer --> environment
+    environment --> resolve
 
     classDef persona fill:#eef2ff,stroke:#6366f1,color:#312e81,stroke-width:2px
     classDef screen fill:#f8fafc,stroke:#64748b,color:#1e293b,stroke-width:2px
@@ -79,7 +82,7 @@ Numbers match the callout table.
 | 4   | Flips the flag's toggle. | Action | The user's choice is saved. |
 | 5   | The person testing the app. | Persona | Same person as the system context. |
 | 6   | Passes a launch argument or environment variable, by hand or from `FlagLaunch`. | Action | A run forces a flag without a rebuild. |
-| 7   | Takes the launch argument, then environment, toggle and default. | System | Precedence lives in one place. |
+| 7   | Checks the flag ships in this build, then takes the launch argument, variable, toggle and defaults. | System | Precedence lives in one place. |
 | 8   | The flagged feature appears only when the flag is on. | Screen | What the user came to see. |
 | 9   | Lists the flags past their expiry day, never a setting without one. | System | The app's test fails until they go. |
 | 10  | The view redraws when the flag's toggle changes. | Screen | A toggle shows at once. |
@@ -87,3 +90,4 @@ Numbers match the callout table.
 | 12  | Picks one of a setting's choices, an enum with a `String` raw value. | Action | A setting needs no code per choice. |
 | 13  | Reports each change to the user's layer with its writer, and writes imported values as imports. | System | An app syncs settings without sending imports back. |
 | 14  | Turns off a parent, which turns its children off and keeps their own settings. | Action | One switch covers a group and loses no choice. |
+| 15  | Sets the Info.plist key per build configuration and lists each flag's environments. | Action | A beta runs for testers and stays off in production. |

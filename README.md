@@ -47,6 +47,43 @@ static let daySuggestions = Flag(
 
 While the parent is off, `resolve(_:)` returns off with `FlagOrigin.parent(_:)`, even over the child's override. `changes()` names the child when its parent changes. The child keeps its own setting under its own key, which sync carries like any flag. A group is one level deep: a parent that has a parent of its own stops the app.
 
+### Ship a flag per environment
+
+A `FlagEnvironment` says who a build is for. It is `debug` from Xcode, `internal` for testers such as TestFlight, and `production` from the App Store. A flag lists the environments it ships in, every one when it lists none. It may also start at another value in one environment:
+
+```swift
+static let mentions = Flag(
+    "mentions", default: false, title: "Mentions",
+    availability: [.debug, .internal], environmentDefaults: [.debug: true])
+```
+
+Outside its environments a flag reads its compiled default, its toggle hides, and a child under it reads off. The user's saved value stays, and sync carries it. Overrides apply in `debug` and `internal` only, so in `production` only the user's own settings change a flag.
+
+Environment gates what the user sees, never security or purchases.
+
+### Declare the build's environment
+
+The system can't reliably tell a TestFlight build from an App Store one, so the app says which it is. Add a `FeatureFlagEnvironment` key to the app's Info.plist that reads a build setting:
+
+```xml
+<key>FeatureFlagEnvironment</key>
+<string>$(FLAG_ENVIRONMENT)</string>
+```
+
+```yaml
+# XcodeGen project.yml: set FLAG_ENVIRONMENT per build configuration.
+settings:
+  configs:
+    Debug:
+      FLAG_ENVIRONMENT: debug
+    Beta:
+      FLAG_ENVIRONMENT: internal
+    Release:
+      FLAG_ENVIRONMENT: production
+```
+
+With no key, or a value it doesn't know, `FlagStore.live()` picks `debug` in a build compiled with `DEBUG` and `production` otherwise. A test passes the environment straight in, `FlagStore.isolated(in: .production)` or `FlagStore.live(in: .internal)`; `isolated()` alone is `debug`. The type is not named `Environment`, so it never clashes with SwiftUI's.
+
 ## Read and toggle
 
 ```swift
@@ -60,9 +97,12 @@ A toggle set to the default, or to nil, removes its key, so it follows a later r
 
 `resolve(_:)` returns the value and where it came from. The store asks, in order:
 
-1. A launch argument, `-flag.onThisDay YES`.
-1. An environment variable, `FLAG_ON_THIS_DAY=YES`.
+1. Whether the flag ships in this environment; if not, it reads the compiled default.
+1. Whether its parent is off or missing from this environment; if so, it reads off.
+1. A launch argument, `-flag.onThisDay YES`, outside production.
+1. An environment variable, `FLAG_ON_THIS_DAY=YES`, outside production.
 1. The user's setting.
+1. The flag's default for this environment.
 1. The compiled default.
 
 `FlagEncoding` spells each name. Bool flags read `YES`, `NO`, `true`, `false`, `1` and `0`. A value is written as its `flagText`, its description unless its type sets one that reads back.
@@ -133,9 +173,17 @@ struct MemoriesView: View {
 
 `@FlagState` reads the environment's `flagStore`, which defaults to `FlagStore.live()`. The view redraws when the flag's toggle changes, from any store over the same settings, and a child redraws when its parent changes. `$child` binds the child's own setting, so an app's Settings shows it even while the parent is off. Set `.environment(\.flagStore, .isolated())` to give a preview or test its own store.
 
+The wrapper itself says whether the flag ships in this build, so the app's Settings can hide the toggle. `FlagStore.isAvailable(_:)` answers the same outside a view:
+
+```swift
+if _onThisDay.isAvailable {
+    Toggle("On This Day", isOn: $onThisDay)
+}
+```
+
 ## Debug screen
 
-`FlagDebugView(catalog:)` lists every flag in the catalog. Each row shows the title, value, the layer that set it and the expiry day, which a permanent setting leaves out. A child sits indented under its parent, and reads "Off, because Use suggestions is off" while the parent is off.
+`FlagDebugView(catalog:)` opens on the environment and where it came from, such as "Environment: internal, from Info.plist". It lists every flag the build ships, leaving out the rest. Each row shows the title, value, the layer that set it and the expiry day, which a permanent setting leaves out. A child sits indented under its parent, and reads "Off, because Use suggestions is off" while the parent is off.
 
 A `Bool` flag gets a toggle for the user's layer, and an `Int` flag gets a number field. The row names that layer "user setting". Each control is disabled, with the reason, while a launch argument or environment variable sets the flag. "Reset all" asks first, then clears every user setting in the catalog.
 

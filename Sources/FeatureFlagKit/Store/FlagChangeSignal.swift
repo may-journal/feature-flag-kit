@@ -9,7 +9,7 @@ final class FlagChangeSignal: @unchecked Sendable {
         /// The parent's settings key, whose change also changes this flag's value.
         let parentKey: String?
         var stored: Any?
-        let importing: (@Sendable (FlagRawValue) -> FlagImport)?
+        let importing: (@Sendable (FlagRawValue, FlagEnvironment) -> FlagImport)?
     }
 
     /// One change as listeners hear it. A sync hook skips a nil `change`: a stored value
@@ -82,10 +82,12 @@ final class FlagChangeSignal: @unchecked Sendable {
         }
     }
 
-    /// Writes `values` by key through each watched flag as `set` would, reported as imports.
-    /// It skips a key no store watches and a value that does not read as its flag's type.
-    func importValues(_ values: [String: FlagRawValue?]) {
-        let writes = lock.withLock { values.compactMap(plannedWrite) }
+    /// Writes `values` by key through each watched flag as `set` would in `environment`,
+    /// reported as imports. It skips unwatched keys and values not of the flag's type.
+    func importValues(_ values: [String: FlagRawValue?], in environment: FlagEnvironment) {
+        let writes = lock.withLock {
+            values.compactMap { plannedWrite(key: $0.key, raw: $0.value, in: environment) }
+        }
         lock.withLock {
             for write in writes {
                 imported[write.key] = .some(write.value)
@@ -108,12 +110,12 @@ final class FlagChangeSignal: @unchecked Sendable {
 
     /// What an import writes under `key` for `raw`, where a nil value removes the key, or nil
     /// to skip it. Call it holding the lock.
-    private func plannedWrite(key: String, raw: FlagRawValue?) -> (
-        key: String, value: FlagRawValue?
-    )? {
+    private func plannedWrite(key: String, raw: FlagRawValue?, in environment: FlagEnvironment)
+        -> (key: String, value: FlagRawValue?)?
+    {
         guard let importing = watched[key]?.importing else { return nil }
         guard let raw else { return (key, nil) }
-        switch importing(raw) {
+        switch importing(raw, environment) {
         case .store(let value): return (key, value)
         case .remove: return (key, nil)
         case .skip: return nil

@@ -1,8 +1,8 @@
 import FeatureFlagKit
 import SwiftUI
 
-/// Lists each flag in the app's catalog with its value, layer and expiry day, plus "Reset all".
-/// The app opens it however it likes, such as from a hidden gesture.
+/// Names the build's environment, then lists each flag it ships with its value, layer and expiry
+/// day, plus "Reset all". The app opens it however it likes, such as from a hidden gesture.
 public struct FlagDebugView: View {
     private let catalog: FlagCatalog
     /// The environment's store, watched so any flag's change redraws the screen.
@@ -24,8 +24,8 @@ public struct FlagDebugView: View {
     public var body: some View {
         let store = watched.store
         // Read each value and layer here, so the list's data changes and it redraws the row.
-        // Each child follows its parent, indented.
-        let rows = catalog.grouped.map { entry in
+        // Each child follows its parent, indented, and a flag this build doesn't ship has no row.
+        let rows = catalog.grouped.filter { store.isAvailable($0.flag) }.map { entry in
             let debuggable = entry.flag as? any DebuggableFlag
             return (
                 flag: entry.flag, isChild: entry.isChild, shown: debuggable?.shown(in: store),
@@ -33,6 +33,9 @@ public struct FlagDebugView: View {
             )
         }
         Form {
+            Section {
+                Text(FlagText.environment(of: store))
+            }
             Section {
                 ForEach(rows, id: \.flag.settingsKey) { row in
                     FlagDebugRow(

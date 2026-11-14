@@ -19,6 +19,16 @@ public struct FlagOrigin: Sendable, Hashable, CustomStringConvertible {
         FlagOrigin(description: "\(parent.title) is off", parentName: parent.name)
     }
 
+    /// The flag doesn't ship in this environment, so it reads its compiled default.
+    public static func unavailable(in environment: FlagEnvironment) -> FlagOrigin {
+        FlagOrigin("not available in \(environment)")
+    }
+
+    /// The flag's default for this environment, set by `environmentDefaults`.
+    public static func environmentDefault(_ environment: FlagEnvironment) -> FlagOrigin {
+        FlagOrigin("\(environment) default")
+    }
+
     /// A `-flag.<name> <value>` launch argument.
     public static let launchArgument = FlagOrigin("launch argument")
     /// A `FLAG_<NAME>` environment variable.
@@ -27,6 +37,11 @@ public struct FlagOrigin: Sendable, Hashable, CustomStringConvertible {
     public static let user = FlagOrigin("user")
     /// The flag's compiled default.
     public static let compiledDefault = FlagOrigin("default")
+
+    /// Whether a launch argument or environment variable set the flag, over the user's setting.
+    public var isOverride: Bool {
+        self == .launchArgument || self == .environment
+    }
 }
 
 /// A flag's value and the origin that supplied it.

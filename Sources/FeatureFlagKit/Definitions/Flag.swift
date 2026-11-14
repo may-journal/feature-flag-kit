@@ -12,14 +12,19 @@ public protocol AnyFlag: Sendable {
     var settingsKey: String { get }
     /// The toggle this flag sits under, which turns it off while it is off, or nil.
     var parent: Flag<Bool>? { get }
+    /// The environments the flag ships in. Elsewhere it reads its compiled default and its
+    /// toggle hides.
+    var availability: Set<FlagEnvironment> { get }
 }
 
 extension AnyFlag {
     /// A flag of the app's own type sits under no parent.
     public var parent: Flag<Bool>? { nil }
+    /// A flag of the app's own type ships in every environment.
+    public var availability: Set<FlagEnvironment> { Set(FlagEnvironment.allCases) }
 }
 
-/// One flag, defined once: its name, compiled default, title and expiry day.
+/// One flag, defined once: its name, compiled default, title, expiry day and environments.
 /// A flag with no expiry day is a permanent setting, which the expiry test never names.
 public struct Flag<Value: FlagValue>: AnyFlag {
     public let name: String
@@ -27,6 +32,9 @@ public struct Flag<Value: FlagValue>: AnyFlag {
     public let title: String
     public let expires: FlagExpiry
     public let settingsKey: String
+    public let availability: Set<FlagEnvironment>
+    /// The value the flag starts at in an environment, in place of `defaultValue`.
+    public let environmentDefaults: [FlagEnvironment: Value]
     /// Holds the parent apart, since a struct can't hold a value of its own type.
     private let group: FlagGroup?
 
@@ -35,26 +43,37 @@ public struct Flag<Value: FlagValue>: AnyFlag {
 
     /// Defines a flag whose toggle lives under `flag.<name>`, or under
     /// `legacySettingsKey` when an earlier release already stored it there. Leave out
-    /// `expires` for a permanent setting.
+    /// `expires` for a permanent setting, and `availability` for a flag in every environment.
     public init(
         _ name: String, default defaultValue: Value, title: String, expires: FlagExpiry = .never,
-        legacySettingsKey: String? = nil
+        legacySettingsKey: String? = nil,
+        availability: Set<FlagEnvironment> = Set(FlagEnvironment.allCases),
+        environmentDefaults: [FlagEnvironment: Value] = [:]
     ) {
         self.init(
             name, default: defaultValue, title: title, expires: expires,
-            legacySettingsKey: legacySettingsKey, group: nil)
+            legacySettingsKey: legacySettingsKey, availability: availability,
+            environmentDefaults: environmentDefaults, group: nil)
     }
 
     private init(
         _ name: String, default defaultValue: Value, title: String, expires: FlagExpiry,
-        legacySettingsKey: String?, group: FlagGroup?
+        legacySettingsKey: String?, availability: Set<FlagEnvironment>,
+        environmentDefaults: [FlagEnvironment: Value], group: FlagGroup?
     ) {
         self.name = name
         self.defaultValue = defaultValue
         self.title = title
         self.expires = expires
         self.settingsKey = legacySettingsKey ?? FlagEncoding.settingsKey(for: name)
+        self.availability = availability
+        self.environmentDefaults = environmentDefaults
         self.group = group
+    }
+
+    /// The value the flag starts at in `environment`: its default there, or `defaultValue`.
+    public func defaultValue(in environment: FlagEnvironment) -> Value {
+        environmentDefaults[environment] ?? defaultValue
     }
 }
 
@@ -63,7 +82,9 @@ extension Flag where Value == Bool {
     /// own setting. A `parent` that has a parent of its own stops the app: one level deep.
     public init(
         _ name: String, default defaultValue: Bool, title: String, expires: FlagExpiry = .never,
-        legacySettingsKey: String? = nil, parent: Flag<Bool>
+        legacySettingsKey: String? = nil,
+        availability: Set<FlagEnvironment> = Set(FlagEnvironment.allCases),
+        environmentDefaults: [FlagEnvironment: Bool] = [:], parent: Flag<Bool>
     ) {
         precondition(
             parent.parent == nil,
@@ -71,7 +92,8 @@ extension Flag where Value == Bool {
                 + "a group is one level deep.")
         self.init(
             name, default: defaultValue, title: title, expires: expires,
-            legacySettingsKey: legacySettingsKey, group: FlagGroup(parent: parent))
+            legacySettingsKey: legacySettingsKey, availability: availability,
+            environmentDefaults: environmentDefaults, group: FlagGroup(parent: parent))
     }
 }
 

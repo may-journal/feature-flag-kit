@@ -15,7 +15,7 @@ enum FlagDebugStory {
         environmentDefaults: [.debug: true])
     static let onThisDay = Flag(
         "onThisDay", default: false, title: "On This Day",
-        expires: FlagExpiry(year: 2027, month: 6, day: 1))
+        expires: FlagExpiry(year: 2027, month: 6, day: 1), legacySettingsKey: "beta.onThisDay")
     static let gridColumns = Flag(
         "gridColumns", default: 3, title: "Grid columns",
         expires: FlagExpiry(year: 2027, month: 9, day: 30))
@@ -72,61 +72,78 @@ enum FlagDebugStory {
             .environment(\.flagStore, store)
             .preferredColorScheme(scheme)
     }
+
+    /// The debug screen on `store` and `catalog`, in the system's scheme.
+    @MainActor
+    static func debug(
+        _ store: FlagStore, catalog: FlagCatalog = catalog, confirmsReset: Bool = false
+    ) -> some View {
+        FlagDebugView(catalog: catalog, confirmsReset: confirmsReset)
+            .environment(\.flagStore, store)
+    }
+
+    /// A screen that reads `flag` with `@FlagState` on `store`, under what the launch carried.
+    @MainActor
+    static func feature(
+        _ store: FlagStore, _ flag: Flag<Bool> = onThisDay, launch: [String] = []
+    ) -> some View {
+        FeatureStory(flag, launch: launch).environment(\.flagStore, store)
+    }
 }
 
-#Preview("FlagDebugView: catalog") {
+#Preview("0005.1 Debug screen: catalog") {
     FlagDebugStory.screen(.isolated(), .light)
 }
 
-#Preview("FlagDebugView: catalog, dark") {
+#Preview("0005.1 Debug screen: catalog, dark") {
     FlagDebugStory.screen(.isolated(), .dark)
 }
 
-#Preview("FlagDebugView: forced by launch argument") {
+#Preview("0005.2 Debug screen: forced by launch argument") {
     FlagDebugStory.screen(FlagDebugStory.forced, .light)
 }
 
-#Preview("FlagDebugView: forced by launch argument, dark") {
+#Preview("0005.2 Debug screen: forced by launch argument, dark") {
     FlagDebugStory.screen(FlagDebugStory.forced, .dark)
 }
 
-#Preview("FlagDebugView: toggled on by the user") {
+#Preview("0005.3 Debug screen: toggled on by the user") {
     FlagDebugStory.screen(FlagDebugStory.toggled, .light)
 }
 
-#Preview("FlagDebugView: toggled on by the user, dark") {
+#Preview("0005.3 Debug screen: toggled on by the user, dark") {
     FlagDebugStory.screen(FlagDebugStory.toggled, .dark)
 }
 
-#Preview("FlagDebugView: number edited") {
+#Preview("0006.1 Debug screen: number edited") {
     FlagDebugStory.screen(FlagDebugStory.edited, .light)
 }
 
-#Preview("FlagDebugView: number edited, dark") {
+#Preview("0006.1 Debug screen: number edited, dark") {
     FlagDebugStory.screen(FlagDebugStory.edited, .dark)
 }
 
-#Preview("FlagDebugView: group with its parent off") {
+#Preview("0010.5 Debug screen: group with its parent off") {
     FlagDebugStory.screen(FlagDebugStory.parentOff, .light)
 }
 
-#Preview("FlagDebugView: group with its parent off, dark") {
+#Preview("0010.5 Debug screen: group with its parent off, dark") {
     FlagDebugStory.screen(FlagDebugStory.parentOff, .dark)
 }
 
-#Preview("FlagDebugView: production build") {
+#Preview("0012.6 Debug screen: production build") {
     FlagDebugStory.screen(FlagDebugStory.production, .light)
 }
 
-#Preview("FlagDebugView: production build, dark") {
+#Preview("0012.6 Debug screen: production build, dark") {
     FlagDebugStory.screen(FlagDebugStory.production, .dark)
 }
 
-#Preview("FlagDebugView: Reset all confirmation") {
+#Preview("0006.2 Debug screen: Reset all confirmation") {
     FlagDebugStory.screen(FlagDebugStory.edited, .light, confirmsReset: true)
 }
 
-#Preview("FlagDebugView: Reset all confirmation, dark") {
+#Preview("0006.2 Debug screen: Reset all confirmation, dark") {
     FlagDebugStory.screen(FlagDebugStory.edited, .dark, confirmsReset: true)
 }
 #endif

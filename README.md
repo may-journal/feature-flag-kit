@@ -201,6 +201,10 @@ var body: some View {
 }
 ```
 
+### Copy the flags
+
+"Copy launch arguments" copies each flag that differs from its compiled default as one line, such as `-flag.gridColumns 5`. A developer pastes it into a scheme to start with the tester's flags. `FlagStore.launchArguments(for:)` returns the same arguments in code.
+
 ## Storybook
 
 Every acceptance in [docs/requirements](docs/requirements/) has a `#Preview` page named by its ID. The debug screen's pages are in [FlagDebugView+Previews.swift](Sources/FeatureFlagKitUI/FlagDebugView+Previews.swift), in light and dark, and the rest are in [Stories](Sources/FeatureFlagKitUI/Stories/). The previews compile only in Debug builds, and only the demo app in [Examples/FlagDebugDemo](Examples/FlagDebugDemo/) links [StorybookKit](https://github.com/eure/swift-storybook), which lists them.

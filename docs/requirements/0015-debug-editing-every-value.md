@@ -30,3 +30,7 @@ value types the kit ships
   - Given Tester launches with a decimal flag's launch argument
     - When the debug screen shows that flag's row
       - Then the field is disabled, with the reason beside it
+- 0015.5
+  - Given Developer lists a choice flag with eight choices
+    - When User picks the last choice on the debug screen
+      - Then the row shows that choice, from the user's setting

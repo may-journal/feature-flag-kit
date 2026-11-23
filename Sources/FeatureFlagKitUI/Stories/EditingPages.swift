@@ -12,6 +12,19 @@ extension FlagDebugStory {
     static let editCatalog = FlagCatalog([sortOrder, zoom, greeting])
 }
 
+/// A choice with eight cases, more than a phone's row holds side by side.
+enum StoryWeekday: String, FlagValue, CaseIterable {
+    case monday, tuesday, wednesday, thursday, friday, saturday, sunday, holiday
+}
+
+#Preview("0015.5 Debug screen: a long list of choices") {
+    FlagDebugStory.debug(
+        .story(),
+        catalog: FlagCatalog([
+            Flag("weekStart", default: StoryWeekday.monday, title: "Week starts")
+        ]))
+}
+
 #Preview("0015.1 Debug screen: a choice picked") {
     FlagDebugStory.debug(
         .story { $0.set(.oldest, for: FlagDebugStory.sortOrder) },

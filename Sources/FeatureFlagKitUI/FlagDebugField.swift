@@ -56,14 +56,11 @@ struct FlagFieldControl: View {
         switch field {
         case .choice(let choices, let selection):
             LabeledContent(title) {
-                // One button per choice, the chosen one tinted and marked as selected.
-                HStack {
-                    ForEach(choices, id: \.self) { choice in
-                        let isChosen = choice == selection.wrappedValue
-                        Button(choice) { selection.wrappedValue = choice }
-                            .buttonStyle(.bordered)
-                            .tint(isChosen ? Color.accentColor : Color.secondary)
-                            .accessibilityAddTraits(isChosen ? .isSelected : [])
+                // A list too long for one row stacks, so every choice stays on a phone's screen.
+                ViewThatFits(in: .horizontal) {
+                    HStack { FlagChoiceButtons(choices: choices, selection: selection) }
+                    VStack(alignment: .trailing) {
+                        FlagChoiceButtons(choices: choices, selection: selection)
                     }
                 }
             }
@@ -75,6 +72,22 @@ struct FlagFieldControl: View {
             LabeledContent(title) {
                 TextField(String(), value: text, format: FlagTextFormat()).flagFieldStyle(title)
             }
+        }
+    }
+}
+
+/// One button per choice, the chosen one tinted and marked as selected.
+private struct FlagChoiceButtons: View {
+    let choices: [String]
+    @Binding var selection: String
+
+    var body: some View {
+        ForEach(choices, id: \.self) { choice in
+            let isChosen = choice == selection
+            Button(choice) { selection = choice }
+                .buttonStyle(.bordered)
+                .tint(isChosen ? Color.accentColor : Color.secondary)
+                .accessibilityAddTraits(isChosen ? .isSelected : [])
         }
     }
 }

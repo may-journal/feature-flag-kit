@@ -32,6 +32,7 @@ public struct FlagDebugView: View {
                 own: debuggable?.ownOrigin(in: store)
             )
         }
+        let rejected = store.rejectedOverrides(in: catalog)
         Form {
             Section {
                 Text(FlagText.environment(of: store))
@@ -40,7 +41,8 @@ public struct FlagDebugView: View {
                 ForEach(rows, id: \.flag.settingsKey) { row in
                     FlagDebugRow(
                         flag: row.flag, store: store, shown: row.shown, own: row.own,
-                        isChild: row.isChild)
+                        isChild: row.isChild,
+                        rejected: rejected.filter { $0.name == row.flag.name }.map(\.description))
                 }
             }
             Section {

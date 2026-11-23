@@ -35,6 +35,7 @@ classDiagram
     class FlagEnvironment["26 FlagEnvironment"]
     class FlagEnvironmentSource["27 FlagEnvironmentSource"]
     class FlagCatalogProblem["28 FlagCatalogProblem"]
+    class FlagRejectedOverride["29 FlagRejectedOverride"]
 
     Flag ..|> AnyFlag : A
     Flag --> FlagExpiry : B
@@ -99,6 +100,8 @@ classDiagram
     FlagOrigin --> FlagEnvironment : III
     FlagCatalog --> FlagCatalogProblem : JJJ
     FlagCatalog --> FlagEncoding : KKK
+    FlagStore --> FlagRejectedOverride : LLL
+    FlagRejectedOverride --> FlagOrigin : MMM
 
     style Flag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style AnyFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -106,6 +109,7 @@ classDiagram
     style FlagExpiry fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagCatalog fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagCatalogProblem fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style FlagRejectedOverride fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagEncoding fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagStore fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagSource fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -178,6 +182,7 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 26  | [`FlagEnvironment`](../../Sources/FeatureFlagKit/Definitions/FlagEnvironment.swift) is who a build is for: debug, internal or production, read from the `FeatureFlagEnvironment` Info.plist key. | The system can't tell TestFlight apart reliably, so the app says. |
 | 27  | [`FlagEnvironmentSource`](../../Sources/FeatureFlagKit/Definitions/FlagEnvironment.swift) is where the environment came from: Info.plist, a Debug or release build, or the app. | The debug screen says why the build is what it is. |
 | 28  | [`FlagCatalogProblem`](../../Sources/FeatureFlagKit/Definitions/FlagCatalogProblem.swift) is one collision `FlagCatalog.problems()` names, such as two flags under one settings key. | An app test fails before two flags share a toggle. |
+| 29  | [`FlagRejectedOverride`](../../Sources/FeatureFlagKit/Store/FlagRejectedOverride.swift) is one override whose text does not read as its flag's type. | A tester sees the typo. |
 | A   | `Flag` conforms to `AnyFlag`. | The catalog holds any flag. |
 | B   | `Flag` carries its expiry day, `never` for a setting. | Expiry is part of the definition. |
 | C   | `Flag` asks `FlagEncoding` for its default settings key. | One encoding for all keys. |
@@ -241,6 +246,8 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | III | `FlagOrigin` names the environment a flag is missing from, or whose default it read. | A debug screen says why. |
 | JJJ | `FlagCatalog` names each collision among its flags as a `FlagCatalogProblem`. | One test lists every collision. |
 | KKK | `FlagCatalog` asks `FlagEncoding` for each flag's environment variable. | Two names that spell one variable are found. |
+| LLL | `FlagStore` lists the overrides it could not read as `FlagRejectedOverride`. | The next layer no longer answers in silence. |
+| MMM | `FlagRejectedOverride` names its layer with a `FlagOrigin`. | The debug screen says which layer was mistyped. |
 ## Platforms
 
 iOS 26 and macOS 26 and later, built with Swift tools 6.2 in the Swift 6 language mode.

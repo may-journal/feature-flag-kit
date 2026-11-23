@@ -105,7 +105,7 @@ A toggle set to the default, or to nil, removes its key, so it follows a later r
 1. The flag's default for this environment.
 1. The compiled default.
 
-`FlagEncoding` spells each name. Bool flags read `YES`, `NO`, `true`, `false`, `1` and `0`. A value is written as its `flagText`, its description unless its type sets one that reads back.
+An override whose text does not read as the flag's type is skipped, and `rejectedOverrides(in:)` and the debug screen name it. `FlagEncoding` spells each name. Bool flags read `YES`, `NO`, `true`, `false`, `1` and `0`. A value is written as its `flagText`, its description unless its type sets one that reads back.
 
 ## Sync the user's settings
 

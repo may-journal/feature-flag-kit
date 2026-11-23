@@ -45,6 +45,7 @@ flowchart TB
     sync[(13 Sync hook hears the user's changes and imports values<br/>Req 0009)]:::system
     group(14 Turn off a parent toggle<br/>Req 0010):::action
     environment(15 Declare the build's environment and each flag's builds<br/>Req 0011 Req 0012):::action
+    storybook[16 Storybook shows a page for every acceptance<br/>Req 0013]:::screen
 
     developer --> define
     user --> toggle
@@ -65,6 +66,7 @@ flowchart TB
     group --> resolve
     developer --> environment
     environment --> resolve
+    developer --> storybook
 
     classDef persona fill:#eef2ff,stroke:#6366f1,color:#312e81,stroke-width:2px
     classDef screen fill:#f8fafc,stroke:#64748b,color:#1e293b,stroke-width:2px
@@ -91,3 +93,4 @@ Numbers match the callout table.
 | 13  | Reports each change to the user's layer with its writer, and writes imported values as imports. | System | An app syncs settings without sending imports back. |
 | 14  | Turns off a parent, which turns its children off and keeps their own settings. | Action | One switch covers a group and loses no choice. |
 | 15  | Sets the Info.plist key per build configuration and lists each flag's environments. | Action | A beta runs for testers and stays off in production. |
+| 16  | Opens the demo app's storybook, where each page is named by the acceptance it shows. | Screen | A state is seen without tapping to it. |

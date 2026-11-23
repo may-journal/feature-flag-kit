@@ -203,9 +203,9 @@ var body: some View {
 
 ## Storybook
 
-Each state of the debug screen is a `#Preview` in [FlagDebugView+Previews.swift](Sources/FeatureFlagKitUI/FlagDebugView+Previews.swift), in light and dark. The previews compile only in Debug builds. The demo app in [Examples/FlagDebugDemo](Examples/FlagDebugDemo/) lists them in a storybook made with [StorybookKit](https://github.com/eure/swift-storybook). Only the demo app links StorybookKit, so an app that adds this package never inherits it.
+Every acceptance in [docs/requirements](docs/requirements/) has a `#Preview` page named by its ID. The debug screen's pages are in [FlagDebugView+Previews.swift](Sources/FeatureFlagKitUI/FlagDebugView+Previews.swift), in light and dark, and the rest are in [Stories](Sources/FeatureFlagKitUI/Stories/). The previews compile only in Debug builds, and only the demo app in [Examples/FlagDebugDemo](Examples/FlagDebugDemo/) links [StorybookKit](https://github.com/eure/swift-storybook), which lists them.
 
-To open the storybook, generate the demo's project with XcodeGen and run it; the demo opens on the storybook. To open one story, add `--storybook "FlagDebugView: number edited"` to the scheme's Arguments.
+To open the storybook, generate the demo's project with XcodeGen and run it; the demo opens on the storybook. To open one story, add `--storybook "0006.1 Debug screen: number edited"` to the scheme's Arguments.
 
 ```sh
 xcodegen generate --spec Examples/FlagDebugDemo/project.yml

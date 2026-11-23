@@ -185,7 +185,7 @@ if _onThisDay.isAvailable {
 
 `FlagDebugView(catalog:)` opens on the environment and where it came from, such as "Environment: internal, from Info.plist". It lists every flag the build ships, leaving out the rest. Each row shows the title, value, the layer that set it and the expiry day, which a permanent setting leaves out. A child sits indented under its parent, and reads "Off, because Use suggestions is off" while the parent is off.
 
-A `Bool` flag gets a toggle for the user's layer, and an `Int` flag gets a number field. The row names that layer "user setting". Each control is disabled, with the reason, while a launch argument or environment variable sets the flag. "Reset all" asks first, then clears every user setting in the catalog.
+A `Bool` flag gets a toggle for the user's layer, which the row names "user setting". A number or text flag gets a field, and a `CaseIterable` enum a button per choice. Each control is disabled, with the reason, while a launch argument or environment variable sets the flag. "Reset all" asks first, then clears every user setting in the catalog.
 
 The app decides how to open it. A hidden gesture stays in the app:
 

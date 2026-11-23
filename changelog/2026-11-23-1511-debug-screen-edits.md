@@ -4,6 +4,6 @@
 
 - Feat: `FlagDebugView` edits a `Double` or `String` flag in a field.
 - Feat: it edits a `CaseIterable` choice flag with a button per choice, stacked when the list is long.
-- Docs: requirement 0015 and the architecture views name the new editing.
-- Docs: the README lists an off parent before the build in the store's order.
+- Docs: requirement 0015 names the new editing, and the README lists an off parent before the build.
 - Feat: the debug screen copies the flags as launch arguments from `FlagStore.launchArguments(for:)`.
+- Feat: `FlagStore.rejectedOverrides(in:)` and the debug screen name an override whose text the store cannot read.

@@ -36,7 +36,7 @@ flowchart TB
     toggle(4 Turn the flag on in Settings<br/>Req 0001):::action
     tester((5 Tester)):::persona
     launch(6 Launch with an override<br/>Req 0002 Req 0007):::action
-    resolve[(7 Store resolves the flag<br/>Req 0001 Req 0002 Req 0016)]:::system
+    resolve[(7 Store resolves the flag<br/>Req 0001 Req 0002 Req 0016 Req 0018)]:::system
     feature[8 Feature shows or hides<br/>Req 0001 Req 0002]:::screen
     expiry[(9 Catalog tests name stale and colliding flags<br/>Req 0003 Req 0014)]:::system
     view[10 View reads the flag with @FlagState<br/>Req 0004]:::screen

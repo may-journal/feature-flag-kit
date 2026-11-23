@@ -240,11 +240,15 @@ app.launch()
 session.launch(arguments: ["-uiTesting"] + FlagLaunch.arguments(.set(AppFlags.onThisDay, true)))
 ```
 
-Add one test so a flag cannot outstay its expiry day:
+Add one test so a flag cannot outstay its expiry day, and another so no two flags collide. `problems()` names flags that share a name, a settings key or an environment variable, and a child whose parent the catalog leaves out:
 
 ```swift
 @Test func noFlagIsPastItsDay() {
     #expect(AppFlags.catalog.expired().map(\.name) == [])
+}
+
+@Test func noFlagsCollide() {
+    #expect(AppFlags.catalog.problems().map(\.description) == [])
 }
 ```
 

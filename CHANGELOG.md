@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/may-journal/feature-flag-kit/compare/v1.5.0...v1.6.0) (2026-11-23)
+
+
+### Features
+
+* **core:** name the flags that collide in a catalog ([#35](https://github.com/may-journal/feature-flag-kit/issues/35)) ([601c00a](https://github.com/may-journal/feature-flag-kit/commit/601c00a0f2c953413aa4d9a257f854c1096d12eb))
+
 ## [1.5.0](https://github.com/may-journal/feature-flag-kit/compare/v1.4.0...v1.5.0) (2026-11-14)
 
 

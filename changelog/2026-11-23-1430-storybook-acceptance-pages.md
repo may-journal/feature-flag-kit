@@ -5,3 +5,4 @@
 - Fix: the debug screen's 14 pages start with the acceptance they show, such as "0006.1 Debug screen: number edited".
 - Feat: each other acceptance has its own page, built from `@FlagState`, `FlagDebugView` and the store on isolated settings.
 - Docs: the README's Storybook section names the pages and where they live.
+- Feat: `FlagCatalog.problems()` names flags that share a name, settings key or environment variable, and a child whose parent is not listed.

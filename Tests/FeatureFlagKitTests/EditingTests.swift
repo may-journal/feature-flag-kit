@@ -4,6 +4,11 @@ import SwiftUI
 import Testing
 import UITestingLibrary
 
+/// A choice with eight cases, more than a phone's row holds side by side.
+private enum Weekday: String, FlagValue, CaseIterable {
+    case monday, tuesday, wednesday, thursday, friday, saturday, sunday, holiday
+}
+
 /// Requirement 0015: the debug screen edits a choice, a decimal and a text flag.
 extension FeatureFlagKitTests {
     @MainActor
@@ -43,6 +48,18 @@ extension FeatureFlagKitTests {
             try await user.types("Hello")
             try await user.presses(.enter)
             try await user.sees(.text("Hello, from user setting"))
+            try screen.close()
+        }
+
+        @Test func test0015_5() async throws {
+            let weekday = Flag("weekStart", default: Weekday.monday, title: "Week starts")
+            let screen = try Screen.render {
+                FlagDebugView(catalog: FlagCatalog([weekday]))
+                    .environment(\.flagStore, .isolated())
+            }
+            let user = User(screen)
+            try await user.taps(.button("holiday"))
+            try await user.sees(.text("holiday, from user setting"))
             try screen.close()
         }
 

@@ -205,6 +205,10 @@ var body: some View {
 
 The system's search field, "Search", keeps the rows whose title or name holds the text in any case. A matching child keeps its parent's row above it. With no match the list says "No flags match", and "Reset all" still covers every flag. `FlagCatalog.grouped(matching:)` returns the same rows in code.
 
+### Catalog problems
+
+When `FlagCatalog.problems()` names any collision, a "Catalog problems" section sits above the flags. Each problem is one warning line, in the words the catalog's test prints. Two flags under one settings key still get a row each, so the tester sees both move together.
+
 ### Copy the flags
 
 "Copy launch arguments" copies each flag that differs from its compiled default as one line, such as `-flag.gridColumns 5`. A developer pastes it into a scheme to start with the tester's flags. `FlagStore.launchArguments(for:)` returns the same arguments in code.

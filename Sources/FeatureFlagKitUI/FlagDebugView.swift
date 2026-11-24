@@ -11,15 +11,18 @@ public struct FlagDebugView: View {
     @State private var confirmsReset: Bool
     /// What the search field holds, matched against each flag's title and name.
     @State private var query: String
+    /// The day the rows count to each expiry day from, or nil for the moment each draw runs.
+    private let today: Date?
 
     public init(catalog: FlagCatalog) {
         self.init(catalog: catalog, confirmsReset: false)
     }
 
     /// Opens on `catalog` with `query` searched, and the "Reset all" confirmation up when
-    /// `confirmsReset` is true. A preview shows either.
-    init(catalog: FlagCatalog, confirmsReset: Bool, query: String = "") {
+    /// `confirmsReset` is true. A preview or test shows either, and fixes `today`.
+    init(catalog: FlagCatalog, confirmsReset: Bool, query: String = "", today: Date? = nil) {
         self.catalog = catalog
+        self.today = today
         _confirmsReset = State(initialValue: confirmsReset)
         _query = State(initialValue: query)
     }
@@ -46,7 +49,8 @@ public struct FlagDebugView: View {
                     FlagDebugRow(
                         flag: row.flag, store: store, shown: row.shown, own: row.own,
                         isChild: row.isChild,
-                        rejected: rejected.filter { $0.name == row.flag.name }.map(\.description))
+                        rejected: rejected.filter { $0.name == row.flag.name }.map(\.description),
+                        today: today ?? .now)
                 }
                 if rows.isEmpty, !query.isEmpty {
                     ContentUnavailableView { Text(Self.noMatch) }

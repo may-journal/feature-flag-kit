@@ -20,6 +20,14 @@ public struct FlagCatalog: Sendable, RandomAccessCollection {
         filter { $0.expires.isPassed(asOf: date) }
     }
 
+    /// The flags whose expiry day comes within `days` days of `date`, in catalog order.
+    /// It leaves out a flag already past its day and a setting without one.
+    public func expiring(within days: Int, asOf date: Date = .now) -> [any AnyFlag] {
+        filter { flag in
+            flag.expires.daysLeft(within: days, asOf: date) != nil
+        }
+    }
+
     /// Every flag with each listed child moved right under its parent, as a debug screen shows
     /// them. A child whose parent the catalog doesn't list stays where the app put it.
     public var grouped: [(flag: any AnyFlag, isChild: Bool)] {

@@ -76,6 +76,17 @@ enum FlagText {
         "Expires " + String(format: "%04d-%02d-%02d", expires.year, expires.month, expires.day)
     }
 
+    /// The days a debug row counts down: a month, one release cycle.
+    static let nearDays = 30
+
+    /// The expiry day, counted down within `nearDays` of `date`: "Expires 2027-03-01, in 12 days".
+    static func expiry(_ expires: FlagExpiry, asOf date: Date) -> String {
+        guard let left = expires.daysLeft(within: nearDays, asOf: date) else {
+            return expiry(expires)
+        }
+        return expiry(expires) + (left == 1 ? ", in 1 day" : ", in \(left) days")
+    }
+
     /// Why the user's control is disabled: a layer above it sets the flag.
     static func overridden(by origin: FlagOrigin) -> String {
         "Set by the \(Self.origin(origin)), which beats this setting."
@@ -96,6 +107,8 @@ struct FlagDebugRow: View {
     var isChild = false
     /// The overrides the store could not read for this flag, each said in words.
     var rejected: [String] = []
+    /// The moment the screen counts the days to the expiry day from.
+    var today = Date.now
 
     var body: some View {
         // An override sits above the control and shows its reason, even under an off parent.
@@ -110,7 +123,7 @@ struct FlagDebugRow: View {
                     ?? FlagText.unknown)
             // A permanent setting has no expiry day to show.
             if !flag.expires.isNever {
-                Text(FlagText.expiry(flag.expires))
+                Text(FlagText.expiry(flag.expires, asOf: today))
                     .foregroundStyle(.secondary)
             }
             if overriding, let own {

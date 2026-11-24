@@ -260,6 +260,18 @@ Add one test so a flag cannot outstay its expiry day, and another so no two flag
 }
 ```
 
+### Warn before a flag expires
+
+`expiring(within:)` names each flag whose day comes within that many UTC days, so a test warns without failing. The debug screen counts down the last 30 days on the row, such as "Expires 2027-03-01, in 12 days":
+
+```swift
+@Test func flagsNearTheirDay() {
+    withKnownIssue(isIntermittent: true) {
+        #expect(AppFlags.catalog.expiring(within: 14).map(\.name) == [])
+    }
+}
+```
+
 ## Docs
 
 - [docs/architecture/](docs/architecture/): the design.

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/may-journal/feature-flag-kit/compare/v1.6.0...v1.7.0) (2026-11-24)
+
+
+### Features
+
+* **ui:** edit choice, decimal and text flags on the debug screen ([#37](https://github.com/may-journal/feature-flag-kit/issues/37)) ([5ce5825](https://github.com/may-journal/feature-flag-kit/commit/5ce582553a33c1f4b03911ac5aa7f2aeb35c825a))
+
 ## [1.6.0](https://github.com/may-journal/feature-flag-kit/compare/v1.5.0...v1.6.0) (2026-11-23)
 
 

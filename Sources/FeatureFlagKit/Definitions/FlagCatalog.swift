@@ -39,4 +39,28 @@ public struct FlagCatalog: Sendable, RandomAccessCollection {
                 + (children[flag.settingsKey] ?? []).map { (flag: $0, isChild: true) }
         }
     }
+
+    /// The grouped flags whose title or name holds `query` in any case, each matching child
+    /// still under its parent's row. Spaces around it are dropped, and a blank one keeps all.
+    public func grouped(matching query: String) -> [(flag: any AnyFlag, isChild: Bool)] {
+        let rows = grouped
+        let query = query.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return rows }
+        let matches = rows.map { row in
+            [row.flag.title, row.flag.name].contains {
+                $0.range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+            }
+        }
+        // A parent stays for a matching child, which always follows it in `grouped`.
+        var keeps = matches
+        var parent: Int?
+        for (index, row) in rows.enumerated() {
+            if !row.isChild {
+                parent = index
+            } else if matches[index], let parent {
+                keeps[parent] = true
+            }
+        }
+        return rows.indices.filter { keeps[$0] }.map { rows[$0] }
+    }
 }

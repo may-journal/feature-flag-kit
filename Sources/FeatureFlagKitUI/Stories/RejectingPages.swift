@@ -22,4 +22,9 @@ import SwiftUI
 #Preview("0018.4 Debug screen: names nothing in production") {
     FlagDebugStory.debug(.story(arguments: ["-flag.gridColumns", "four"], in: .production))
 }
+
+#Preview("0018.5 Debug screen: names nothing for a valid argument") {
+    FlagDebugStory.debug(
+        .story(arguments: ["-flag.gridColumns", "5"], variables: ["FLAG_GRID_COLUMNS": "four"]))
+}
 #endif

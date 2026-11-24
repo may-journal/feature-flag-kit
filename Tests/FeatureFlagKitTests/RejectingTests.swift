@@ -44,5 +44,15 @@ extension FeatureFlagKitTests {
             let store = FlagStore.isolated(arguments: mistyped, in: .production)
             #expect(store.rejectedOverrides(in: ExampleFlags.catalog).isEmpty)
         }
+
+        @Test func test0018_5() {
+            // Labs ships in debug builds only, and the launch argument decides Grid columns.
+            let store = FlagStore.isolated(
+                arguments: ["-flag.gridColumns", "5"],
+                environment: ["FLAG_GRID_COLUMNS": "four", "FLAG_LABS": "maybe"], in: .internal)
+            let catalog = FlagCatalog([ExampleFlags.gridColumns, ExampleFlags.labs])
+            #expect(store[ExampleFlags.gridColumns] == 5)
+            #expect(store.rejectedOverrides(in: catalog).isEmpty)
+        }
     }
 }

@@ -55,18 +55,21 @@ extension Flag: OverrideReadingFlag {
 }
 
 extension FlagStore {
-    /// Each override for a flag in `catalog` whose text does not read as the flag's type, in
-    /// catalog order. A production store reads no override, so it names none.
+    /// Each override the store skipped for a shipped flag in `catalog`, in catalog order.
+    /// One is named only above the override that decided, and production names none.
     public func rejectedOverrides(in catalog: FlagCatalog) -> [FlagRejectedOverride] {
         let overrides = sources.compactMap { $0 as? any OverrideTextSource }
-        return catalog.flatMap { flag -> [FlagRejectedOverride] in
+        return catalog.filter { isAvailable($0) }.flatMap { flag -> [FlagRejectedOverride] in
             guard let reading = flag as? any OverrideReadingFlag else { return [] }
-            return overrides.compactMap { source in
-                guard let text = source.text(for: flag.name), !reading.reads(text) else {
-                    return nil
-                }
-                return FlagRejectedOverride(name: flag.name, origin: source.origin, text: text)
+            var skipped: [FlagRejectedOverride] = []
+            // Sources run in precedence order, so the first override that reads decides.
+            for source in overrides {
+                guard let text = source.text(for: flag.name) else { continue }
+                if reading.reads(text) { break }
+                skipped.append(
+                    FlagRejectedOverride(name: flag.name, origin: source.origin, text: text))
             }
+            return skipped
         }
     }
 }

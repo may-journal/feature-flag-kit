@@ -34,3 +34,8 @@ unreadable overrides in a launch
    1. GIVEN Tester launches a production build with a launch argument that is no number
       1. WHEN Developer asks the store which overrides it rejected
          1. THEN it names none
+5. Names nothing for a valid argument
+   1. GIVEN Tester launches with a valid argument over a mistyped variable
+   2. GIVEN Tester launches with a mistyped variable for an unshipped flag
+      1. WHEN Developer asks the store which overrides it rejected
+         1. THEN it names none

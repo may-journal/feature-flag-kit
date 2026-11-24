@@ -47,7 +47,7 @@ enum ExampleFlags {
 }
 
 /// The choices of the example app's sort setting, a flag value with no code of its own.
-enum SortOrder: String, FlagValue {
+enum SortOrder: String, FlagValue, CaseIterable {
     case newest
     case oldest
 }

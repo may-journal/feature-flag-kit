@@ -11,6 +11,8 @@ protocol DebuggableFlag: AnyFlag {
     func userToggle(in store: FlagStore) -> Binding<Bool>?
     /// A binding to the user's own setting, for a flag that holds an `Int`.
     func userNumber(in store: FlagStore) -> Binding<Int>?
+    /// A control for the user's own setting, for a choice, a `Double` or a `String` flag.
+    func userField(in store: FlagStore) -> FlagField?
 }
 
 extension Flag: DebuggableFlag {
@@ -81,7 +83,7 @@ enum FlagText {
 }
 
 /// One flag's title, value, layer and expiry day if it has one, read by VoiceOver in that order.
-/// A `Bool` flag gets a toggle, an `Int` flag a number field, and a child sits under its parent.
+/// Its control is a toggle, a field or a button per choice, and a child sits under its parent.
 struct FlagDebugRow: View {
     let flag: any AnyFlag
     let store: FlagStore
@@ -125,14 +127,12 @@ struct FlagDebugRow: View {
         } else if let number = debuggable?.userNumber(in: store) {
             LabeledContent(flag.title) {
                 // Saves on Return or when focus leaves, so a half-typed number is never saved.
-                // The row's label shows the title, so the field names it only for VoiceOver.
                 TextField(String(), value: number, format: .number)
-                    .accessibilityLabel(flag.title)
-                    .multilineTextAlignment(.trailing)
-                    .textFieldStyle(.roundedBorder)
-                    .frame(maxWidth: 96)
+                    .flagFieldStyle(flag.title)
                     .numberKeyboard()
             }
+        } else if let field = debuggable?.userField(in: store) {
+            FlagFieldControl(title: flag.title, field: field)
         } else {
             Text(flag.title)
         }

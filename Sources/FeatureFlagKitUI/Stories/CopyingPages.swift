@@ -37,4 +37,8 @@ private struct CopiedLineStory: View {
 #Preview("0017.4 Launch: keeps a child off under its parent") {
     CopiedLineStory(store: FlagDebugStory.parentOff)
 }
+
+#Preview("0017.5 Copy: quotes a shell character") {
+    Text(FlagCopy.line(["-flag.greeting", "a;rm $HOME"])).monospaced().padding()
+}
 #endif

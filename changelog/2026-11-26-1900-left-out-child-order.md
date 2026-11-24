@@ -1,7 +1,9 @@
 ### 2026.11.26.1900
 
-> The store lists an off parent before the build, and requirement 0016 reads as numbered all-caps Gherkin.
+> The debug screen copies the flags as one launch line, and the new requirements read as numbered Gherkin.
 
+- Feat: the debug screen copies the flags as launch arguments from `FlagStore.launchArguments(for:)`.
+- Fix: the copied line puts single quotes around a value with a shell character.
 - Docs: the README, the code view and the user journey list an off parent before the build in the store's order.
-- Docs: requirement 0016 names its acceptances and numbers its GIVEN, WHEN and THEN items.
-- Docs: the story pages for requirement 0016 are named by their acceptances.
+- Docs: the user journey and the README name the copied line.
+- Docs: requirements 0016 and 0017 name their acceptances and number their GIVEN, WHEN and THEN items.

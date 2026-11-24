@@ -33,3 +33,8 @@ flags away from their default
       1. WHEN Tester launches with the store's launch arguments
          1. THEN the child is still off
          2. THEN that holds once the parent is back on
+5. Quotes a shell character
+   1. GIVEN User set a text flag to a value with a semicolon and a dollar sign
+      1. WHEN User taps Copy launch arguments
+         1. THEN the pasteboard holds the value in single quotes
+         2. THEN that value is safe for a shell

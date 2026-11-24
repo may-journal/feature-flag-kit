@@ -64,5 +64,20 @@ extension FeatureFlagKitTests {
             #expect(!launched[ExampleFlags.daySuggestions])
             #expect(launched.resolve(ExampleFlags.daySuggestions).origin == .launchArgument)
         }
+
+        @Test func test0017_5() async throws {
+            let greeting = Flag("greeting", default: "Hello", title: "Greeting")
+            let store = FlagStore.isolated()
+            store.set("a;rm $HOME", for: greeting)
+            let copied = CopiedText()
+            let screen = try Screen.render {
+                FlagDebugView(catalog: FlagCatalog([greeting]))
+                    .environment(\.flagStore, store)
+                    .environment(\.flagPasteboard, FlagPasteboard { copied.text = $0 })
+            }
+            try await User(screen).taps(.button("Copy launch arguments"))
+            #expect(copied.text == "-flag.greeting 'a;rm $HOME'")
+            try screen.close()
+        }
     }
 }

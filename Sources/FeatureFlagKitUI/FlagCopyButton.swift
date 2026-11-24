@@ -23,15 +23,19 @@ struct FlagPasteboard: Sendable {
 
 /// Spells and copies the line a tester hands to a developer.
 enum FlagCopy {
-    /// The arguments as one line for a scheme or a shell, with quotes around any that hold
-    /// a space or nothing.
+    /// The arguments as one line for a scheme or a shell. Single quotes wrap any argument
+    /// that is empty or holds a character a shell reads, such as a space, `;` or `$`.
     static func line(_ arguments: [String]) -> String {
         arguments.map { argument in
-            let isPlain = !argument.isEmpty && !argument.contains { $0.isWhitespace || $0 == "'" }
+            let isPlain = !argument.isEmpty && argument.unicodeScalars.allSatisfy(plain.contains)
             return isPlain ? argument : "'" + argument.replacing("'", with: "'\\''") + "'"
         }
         .joined(separator: " ")
     }
+
+    /// The characters no shell reads specially, which need no quotes.
+    private static let plain = CharacterSet.alphanumerics.union(
+        CharacterSet(charactersIn: "-_.,:/=+@%"))
 
     /// Puts `text` on the system pasteboard.
     @MainActor

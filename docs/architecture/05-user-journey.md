@@ -36,7 +36,7 @@ flowchart TB
     toggle(4 Turn the flag on in Settings<br/>Req 0001):::action
     tester((5 Tester)):::persona
     launch(6 Launch with an override<br/>Req 0002 Req 0007):::action
-    resolve[(7 Store resolves the flag<br/>Req 0001 Req 0002)]:::system
+    resolve[(7 Store resolves the flag<br/>Req 0001 Req 0002 Req 0016)]:::system
     feature[8 Feature shows or hides<br/>Req 0001 Req 0002]:::screen
     expiry[(9 Catalog tests name stale and colliding flags<br/>Req 0003 Req 0014)]:::system
     view[10 View reads the flag with @FlagState<br/>Req 0004]:::screen
@@ -84,7 +84,7 @@ Numbers match the callout table.
 | 4   | Flips the flag's toggle. | Action | The user's choice is saved. |
 | 5   | The person testing the app. | Persona | Same person as the system context. |
 | 6   | Passes a launch argument or environment variable, by hand or from `FlagLaunch`. | Action | A run forces a flag without a rebuild. |
-| 7   | Checks the flag ships in this build, then takes the launch argument, variable, toggle and defaults. | System | Precedence lives in one place. |
+| 7   | Checks the flag's parent is on and the flag ships in this build, then takes the launch argument, variable, toggle and defaults. | System | Precedence lives in one place. |
 | 8   | The flagged feature appears only when the flag is on. | Screen | What the user came to see. |
 | 9   | Lists the flags past their expiry day, never a setting without one, and the flags that collide. | System | The app's tests fail until they go. |
 | 10  | The view redraws when the flag's toggle changes. | Screen | A toggle shows at once. |

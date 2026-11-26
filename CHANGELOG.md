@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/may-journal/feature-flag-kit/compare/v1.7.0...v1.7.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* **ui:** draw light and dark on one page per acceptance ([#58](https://github.com/may-journal/feature-flag-kit/issues/58)) ([1e37797](https://github.com/may-journal/feature-flag-kit/commit/1e37797407a419824c5cf2f3baba12493108a1e2))
+
 ## [1.7.0](https://github.com/may-journal/feature-flag-kit/compare/v1.6.0...v1.7.0) (2026-11-24)
 
 

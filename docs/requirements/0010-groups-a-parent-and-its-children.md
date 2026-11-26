@@ -14,35 +14,39 @@ child flags
 
 ## Requirements
 
-- 0010.1
-  - Given Developer puts a flag under a parent
-    - When User turns the parent off
-      - Then the child reads off
-- 0010.2
-  - Given User turned a child off
-    - When User turns its parent off and back on
-      - Then the child is still off
-- 0010.3
-  - Given Tester launches with a child's launch argument off
-    - When the parent is on
-      - Then the child reads off, from the launch argument
-- 0010.4
-  - Given Developer shows a screen that reads a child with `@FlagState`
-    - When User turns the parent off
-      - Then the screen updates
-- 0010.5
-  - Given User turned a parent off
-    - When User opens the debug screen
-      - Then the child's toggle is disabled, with the parent named as the reason
-- 0010.6
-  - Given Developer lists a child apart from its parent in the catalog
-    - When User opens the debug screen
-      - Then the child's row sits right under its parent
-- 0010.7
-  - Given Developer puts a parent under a parent of its own
-    - When the app defines it
-      - Then the app stops, saying a group is one level deep
-- 0010.8
-  - Given Developer listens for changes to the user's settings, with the parent off
-    - When User flips a child
-      - Then the listener hears the child's own key and value
+1. Parent turns child off
+   1. GIVEN Developer puts a flag under a parent
+      1. WHEN User turns the parent off
+         1. THEN the child reads off
+2. Child keeps its choice
+   1. GIVEN User turned a child off
+      1. WHEN User turns its parent off and back on
+         1. THEN the child is still off
+3. Argument beats parent
+   1. GIVEN Tester launches with a child's launch argument off
+      1. WHEN the parent is on
+         1. THEN the child reads off
+         2. THEN from the launch argument
+4. Updates a child screen
+   1. GIVEN Developer shows a screen that reads a child with `@FlagState`
+      1. WHEN User turns the parent off
+         1. THEN the screen updates
+5. Disables a child toggle
+   1. GIVEN User turned a parent off
+      1. WHEN User opens the debug screen
+         1. THEN the child's toggle is disabled
+         2. THEN with the parent named as the reason
+6. Lists a child under its parent
+   1. GIVEN Developer lists a child apart from its parent in the catalog
+      1. WHEN User opens the debug screen
+         1. THEN the child's row sits right under its parent
+7. Stops at one level
+   1. GIVEN Developer puts a parent under a parent of its own
+      1. WHEN the app defines it
+         1. THEN the app stops
+         2. THEN saying a group is one level deep
+8. Hears a child write
+   1. GIVEN Developer listens for changes to the user's settings
+   2. GIVEN with the parent off
+      1. WHEN User flips a child
+         1. THEN the listener hears the child's own key and value

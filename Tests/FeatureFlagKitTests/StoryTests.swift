@@ -32,5 +32,15 @@ extension FeatureFlagKitTests {
             try await User(screen).sees(.text("Replay is past its day"))
             try screen.close()
         }
+
+        @Test func test0013_4() async throws {
+            let screen = try Screen.render { FlagDebugStory.screen(.story()) }
+            let user = User(screen)
+            try await user.sees(.text("Light"))
+            try await user.sees(.text("Dark"))
+            let spoken = await user.reads().map(\.spoken)
+            #expect(spoken.filter { $0.hasPrefix("Environment") }.count == 2)
+            try screen.close()
+        }
     }
 }

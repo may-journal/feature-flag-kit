@@ -14,31 +14,32 @@ flag reads with an override
 
 ## Requirements
 
-- 0002.1
-  - Given Tester launches with the launch argument off while the user's toggle is on
-    - When the app shows its screen
-      - Then the flagged feature stays hidden
-- 0002.2
-  - Given Tester launches with the environment variable off while the user's toggle is on
-    - When the app shows its screen
-      - Then the flagged feature stays hidden
-- 0002.3
-  - Given Tester sets the launch argument off and the environment variable on
-    - When the app shows its screen
-      - Then the launch argument wins
-- 0002.4
-  - Given Tester launches the app with the flag's launch argument
-    - When the app asks where the flag's value came from
-      - Then it answers the launch argument
-- 0002.5
-  - Given Tester mistypes the launch argument and sets the environment variable off
-    - When the app shows its screen
-      - Then the environment variable decides
-- 0002.6
-  - Given Tester mistypes the environment variable while the user's toggle is on
-    - When the app shows its screen
-      - Then the user's toggle decides
-- 0002.7
-  - Given Tester forces a child off, while its parent is off
-    - When the debug screen shows the child's row
-      - Then the row still names the launch argument
+1. Launch argument forces off
+   1. GIVEN Tester launches with the launch argument off while the user's toggle is on
+      1. WHEN the app shows its screen
+         1. THEN the flagged feature stays hidden
+2. Environment variable forces off
+   1. GIVEN Tester launches with the environment variable off while the user's toggle is on
+      1. WHEN the app shows its screen
+         1. THEN the flagged feature stays hidden
+3. Argument beats variable
+   1. GIVEN Tester sets the launch argument off and the environment variable on
+      1. WHEN the app shows its screen
+         1. THEN the launch argument wins
+4. Source names the argument
+   1. GIVEN Tester launches the app with the flag's launch argument
+      1. WHEN the app asks where the flag's value came from
+         1. THEN it answers the launch argument
+5. Mistyped argument falls through
+   1. GIVEN Tester mistypes the launch argument and sets the environment variable off
+      1. WHEN the app shows its screen
+         1. THEN the environment variable decides
+6. Mistyped variable falls through
+   1. GIVEN Tester mistypes the environment variable while the user's toggle is on
+      1. WHEN the app shows its screen
+         1. THEN the user's toggle decides
+7. Forced child names its source
+   1. GIVEN Tester forces a child off
+   2. GIVEN while its parent is off
+      1. WHEN the debug screen shows the child's row
+         1. THEN the row still names the launch argument

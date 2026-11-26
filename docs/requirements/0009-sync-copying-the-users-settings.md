@@ -14,27 +14,29 @@ changes to the user's settings
 
 ## Requirements
 
-- 0009.1
-  - Given Developer listens for changes to the user's settings
-    - When User flips a toggle
-      - Then the listener hears its key, new value, and that the app wrote it
-- 0009.2
-  - Given Developer listens for changes to the user's settings
-    - When User confirms Reset all
-      - Then the listener hears the key with no value
-- 0009.3
-  - Given Developer listens for changes to the user's settings
-    - When Developer imports values from another device
-      - Then the listener hears them marked as imports
-- 0009.4
-  - Given Developer shows a screen that watches the flag
-    - When Developer imports the flag on from another device
-      - Then the screen updates
-- 0009.5
-  - Given Developer imports a flag's default value from another device
-    - When the next release ships a new default
-      - Then the flag reads the new default
-- 0009.6
-  - Given User turned a flag on
-    - When Developer imports text for it that is neither on nor off
-      - Then the flag stays on
+1. Hears a flip
+   1. GIVEN Developer listens for changes to the user's settings
+      1. WHEN User flips a toggle
+         1. THEN the listener hears its key
+         2. THEN new value
+         3. THEN that the app wrote it
+2. Hears a reset
+   1. GIVEN Developer listens for changes to the user's settings
+      1. WHEN User confirms Reset all
+         1. THEN the listener hears the key with no value
+3. Hears an import
+   1. GIVEN Developer listens for changes to the user's settings
+      1. WHEN Developer imports values from another device
+         1. THEN the listener hears them marked as imports
+4. Updates on an import
+   1. GIVEN Developer shows a screen that watches the flag
+      1. WHEN Developer imports the flag on from another device
+         1. THEN the screen updates
+5. Follows a new default
+   1. GIVEN Developer imports a flag's default value from another device
+      1. WHEN the next release ships a new default
+         1. THEN the flag reads the new default
+6. Ignores odd text
+   1. GIVEN User turned a flag on
+      1. WHEN Developer imports text for it that is neither on nor off
+         1. THEN the flag stays on

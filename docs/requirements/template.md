@@ -12,6 +12,6 @@
 
 ## Requirements
 
-<!-- One to eight IDs, each the title ID plus ".N", never reused. -->
-<!-- Each ID nests one Given, one When, and one Then, each one level deeper. About 15 words in all. -->
-<!-- Exactly one Swift test named testNNNN_N owns each ID, and drives the library as a consumer would. -->
+<!-- One to eight numbered acceptances, each with a name. A removed one stays as "N. Removed in <version>: <reason>". -->
+<!-- Each nests numbered GIVEN, WHEN and THEN items in caps, one condition or result each, with no commas outside code. -->
+<!-- Exactly one Swift test named testNNNN_N owns each acceptance, and drives the library as a consumer would. -->

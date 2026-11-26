@@ -14,23 +14,23 @@ kinds of collision a catalog can hold
 
 ## Requirements
 
-- 0014.1
-  - Given Developer lists two flags with one name
-    - When the catalog test runs
-      - Then it names that name once
-- 0014.2
-  - Given Developer gives a flag a legacy key that is another flag's key
-    - When the catalog test runs
-      - Then it names both flags and the key
-- 0014.3
-  - Given Developer lists two names that spell one environment variable
-    - When the catalog test runs
-      - Then it names both flags and the variable
-- 0014.4
-  - Given Developer lists a child and leaves out its parent
-    - When the catalog test runs
-      - Then it names the child and the parent
-- 0014.5
-  - Given Developer lists flags that share nothing
-    - When the catalog test runs
-      - Then it names none
+1. Names a duplicate name
+   1. GIVEN Developer lists two flags with one name
+      1. WHEN the catalog test runs
+         1. THEN it names that name once
+2. Names a legacy key clash
+   1. GIVEN Developer gives a flag a legacy key that is another flag's key
+      1. WHEN the catalog test runs
+         1. THEN it names both flags and the key
+3. Names a variable clash
+   1. GIVEN Developer lists two names that spell one environment variable
+      1. WHEN the catalog test runs
+         1. THEN it names both flags and the variable
+4. Names a missing parent
+   1. GIVEN Developer lists a child and leaves out its parent
+      1. WHEN the catalog test runs
+         1. THEN it names the child and the parent
+5. Passes a clean catalog
+   1. GIVEN Developer lists flags that share nothing
+      1. WHEN the catalog test runs
+         1. THEN it names none

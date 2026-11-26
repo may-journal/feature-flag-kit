@@ -14,35 +14,38 @@ flag reads
 
 ## Requirements
 
-- 0012.1
-  - Given Developer ships a flag in debug and internal only, and User turned it on
-    - When a production build reads it
-      - Then it reads its default
-- 0012.2
-  - Given Developer starts a flag on in internal builds
-    - When an internal build reads it
-      - Then it reads on
-- 0012.3
-  - Given Tester launches a production build with the flag's launch argument and variable on
-    - When the app reads the flag
-      - Then it reads off
-- 0012.4
-  - Given Tester launches an internal build with the flag's launch argument on
-    - When the app reads the flag
-      - Then it reads on, from the launch argument
-- 0012.5
-  - Given Developer starts a flag on in production builds
-    - When User turns it off in a production build
-      - Then it reads off
-- 0012.6
-  - Given Developer ships a flag in debug and internal only
-    - When User opens the debug screen in a production build
-      - Then the flag has no row
-- 0012.7
-  - Given Developer shows a Settings screen that reads a debug and internal flag with `@FlagState`
-    - When a production build shows it
-      - Then the flag's toggle is hidden
-- 0012.8
-  - Given Developer ships a parent in debug only, with a child in every build
-    - When a production build reads the child
-      - Then it reads off
+1. Hides a flag in production
+   1. GIVEN Developer ships a flag in debug and internal only
+   2. GIVEN User turned it on
+      1. WHEN a production build reads it
+         1. THEN it reads its default
+2. Starts on in internal
+   1. GIVEN Developer starts a flag on in internal builds
+      1. WHEN an internal build reads it
+         1. THEN it reads on
+3. Production ignores forcing
+   1. GIVEN Tester launches a production build with the flag's launch argument and variable on
+      1. WHEN the app reads the flag
+         1. THEN it reads off
+4. Internal takes forcing
+   1. GIVEN Tester launches an internal build with the flag's launch argument on
+      1. WHEN the app reads the flag
+         1. THEN it reads on
+         2. THEN from the launch argument
+5. Production toggles off
+   1. GIVEN Developer starts a flag on in production builds
+      1. WHEN User turns it off in a production build
+         1. THEN it reads off
+6. Hides the row
+   1. GIVEN Developer ships a flag in debug and internal only
+      1. WHEN User opens the debug screen in a production build
+         1. THEN the flag has no row
+7. Hides the toggle
+   1. GIVEN Developer shows a Settings screen that reads a debug and internal flag with `@FlagState`
+      1. WHEN a production build shows it
+         1. THEN the flag's toggle is hidden
+8. Hides a child with its parent
+   1. GIVEN Developer ships a parent in debug only
+   2. GIVEN with a child in every build
+      1. WHEN a production build reads the child
+         1. THEN it reads off

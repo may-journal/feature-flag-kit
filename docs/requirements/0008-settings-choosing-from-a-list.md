@@ -14,15 +14,16 @@ settings with a list of choices
 
 ## Requirements
 
-- 0008.1
-  - Given Developer shows a screen with a setting's list of choices
-    - When User picks a choice
-      - Then the screen shows that choice
-- 0008.2
-  - Given User picked a choice in an earlier release, under its old key
-    - When the app shows the setting's screen
-      - Then the screen shows that choice
-- 0008.3
-  - Given Tester launches with a choice's launch argument
-    - When the app shows the setting's screen
-      - Then the screen shows that choice
+1. Picks a choice
+   1. GIVEN Developer shows a screen with a setting's list of choices
+      1. WHEN User picks a choice
+         1. THEN the screen shows that choice
+2. Reads an old key
+   1. GIVEN User picked a choice in an earlier release
+   2. GIVEN under its old key
+      1. WHEN the app shows the setting's screen
+         1. THEN the screen shows that choice
+3. Forces a choice
+   1. GIVEN Tester launches with a choice's launch argument
+      1. WHEN the app shows the setting's screen
+         1. THEN the screen shows that choice

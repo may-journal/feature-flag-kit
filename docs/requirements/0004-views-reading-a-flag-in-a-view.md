@@ -14,27 +14,31 @@ views that read a flag with `@FlagState`
 
 ## Requirements
 
-- 0004.1
-  - Given User turned the flag on, and the app sets no store
-    - When a view reads the flag with `@FlagState`
-      - Then the flagged feature shows
-- 0004.2
-  - Given Developer shows a view that reads the flag with `@FlagState`, and sets no store
-    - When User flips the toggle elsewhere
-      - Then the view updates
-- 0004.3
-  - Given Developer binds a Settings toggle to the flag's `$binding`
-    - When User turns it on
-      - Then the flag reads on, from the user's toggle
-- 0004.4
-  - Given Tester launches with the flag's launch argument on
-    - When User opens the Settings toggle bound to `$binding`
-      - Then the toggle shows the user's own choice, off
-- 0004.5
-  - Given Developer shows cards that each read the flag with `@FlagState`
-    - When User drags them past half a page
-      - Then the next page shows
-- 0004.6
-  - Given Developer shows a screen that hears the store's changes to a child by name
-    - When User turns the parent off
-      - Then the screen updates
+1. Reads the flag without a store
+   1. GIVEN User turned the flag on
+   2. GIVEN the app sets no store
+      1. WHEN a view reads the flag with `@FlagState`
+         1. THEN the flagged feature shows
+2. Updates without a store
+   1. GIVEN Developer shows a view that reads the flag with `@FlagState`
+   2. GIVEN sets no store
+      1. WHEN User flips the toggle elsewhere
+         1. THEN the view updates
+3. Binds a toggle
+   1. GIVEN Developer binds a Settings toggle to the flag's `$binding`
+      1. WHEN User turns it on
+         1. THEN the flag reads on
+         2. THEN from the user's toggle
+4. Binding shows the user's choice
+   1. GIVEN Tester launches with the flag's launch argument on
+      1. WHEN User opens the Settings toggle bound to `$binding`
+         1. THEN the toggle shows the user's own choice
+         2. THEN off
+5. Scrolls cards that read the flag
+   1. GIVEN Developer shows cards that each read the flag with `@FlagState`
+      1. WHEN User drags them past half a page
+         1. THEN the next page shows
+6. Hears a child by name
+   1. GIVEN Developer shows a screen that hears the store's changes to a child by name
+      1. WHEN User turns the parent off
+         1. THEN the screen updates

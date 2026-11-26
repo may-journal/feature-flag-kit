@@ -62,15 +62,24 @@ enum FlagDebugStory {
         return store
     }
 
-    /// The debug screen on `store`, in `scheme`. It brings no navigation stack, since the
-    /// storybook already pushes each story onto its own.
+    /// The debug screen on `store` in two labeled columns, light then dark, so one page shows both.
+    /// It brings no navigation stack, since the storybook already pushes each story onto its own.
     @MainActor
-    static func screen(
-        _ store: FlagStore, _ scheme: ColorScheme, confirmsReset: Bool = false
-    ) -> some View {
-        FlagDebugView(catalog: catalog, confirmsReset: confirmsReset)
-            .environment(\.flagStore, store)
-            .preferredColorScheme(scheme)
+    static func screen(_ store: FlagStore, confirmsReset: Bool = false) -> some View {
+        HStack(spacing: 0) {
+            ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(scheme == .light ? "Light" : "Dark")
+                        .font(.caption.bold())
+                        .padding(.horizontal)
+                    FlagDebugView(
+                        catalog: catalog, confirmsReset: confirmsReset && scheme == .light
+                    )
+                    .environment(\.flagStore, store)
+                    .environment(\.colorScheme, scheme)
+                }
+            }
+        }
     }
 
     /// The debug screen on `store` and `catalog`, in the system's scheme.
@@ -92,58 +101,34 @@ enum FlagDebugStory {
 }
 
 #Preview("0005.1 Debug screen: catalog") {
-    FlagDebugStory.screen(.isolated(), .light)
-}
-
-#Preview("0005.1 Debug screen: catalog, dark") {
-    FlagDebugStory.screen(.isolated(), .dark)
+    FlagDebugStory.screen(.isolated())
 }
 
 #Preview("0005.2 Debug screen: forced by launch argument") {
-    FlagDebugStory.screen(FlagDebugStory.forced, .light)
-}
-
-#Preview("0005.2 Debug screen: forced by launch argument, dark") {
-    FlagDebugStory.screen(FlagDebugStory.forced, .dark)
+    FlagDebugStory.screen(FlagDebugStory.forced)
 }
 
 #Preview("0005.3 Debug screen: toggled on by the user") {
-    FlagDebugStory.screen(FlagDebugStory.toggled, .light)
-}
-
-#Preview("0005.3 Debug screen: toggled on by the user, dark") {
-    FlagDebugStory.screen(FlagDebugStory.toggled, .dark)
+    FlagDebugStory.screen(FlagDebugStory.toggled)
 }
 
 #Preview("0006.1 Debug screen: number edited") {
-    FlagDebugStory.screen(FlagDebugStory.edited, .light)
-}
-
-#Preview("0006.1 Debug screen: number edited, dark") {
-    FlagDebugStory.screen(FlagDebugStory.edited, .dark)
+    FlagDebugStory.screen(FlagDebugStory.edited)
 }
 
 #Preview("0010.5 Debug screen: group with its parent off") {
-    FlagDebugStory.screen(FlagDebugStory.parentOff, .light)
-}
-
-#Preview("0010.5 Debug screen: group with its parent off, dark") {
-    FlagDebugStory.screen(FlagDebugStory.parentOff, .dark)
+    FlagDebugStory.screen(FlagDebugStory.parentOff)
 }
 
 #Preview("0012.6 Debug screen: production build") {
-    FlagDebugStory.screen(FlagDebugStory.production, .light)
-}
-
-#Preview("0012.6 Debug screen: production build, dark") {
-    FlagDebugStory.screen(FlagDebugStory.production, .dark)
+    FlagDebugStory.screen(FlagDebugStory.production)
 }
 
 #Preview("0006.2 Debug screen: Reset all confirmation") {
-    FlagDebugStory.screen(FlagDebugStory.edited, .light, confirmsReset: true)
+    FlagDebugStory.screen(FlagDebugStory.edited, confirmsReset: true)
 }
 
-#Preview("0006.2 Debug screen: Reset all confirmation, dark") {
-    FlagDebugStory.screen(FlagDebugStory.edited, .dark, confirmsReset: true)
+#Preview("0013.4 Debug screen: light beside dark") {
+    FlagDebugStory.screen(.isolated())
 }
 #endif

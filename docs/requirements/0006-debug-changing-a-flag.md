@@ -14,23 +14,25 @@ number flags in the app's catalog
 
 ## Requirements
 
-- 0006.1
-  - Given User opens the debug screen
-    - When User types a new number for a number flag
-      - Then the row shows that number, from the user's setting
-- 0006.2
-  - Given User set a flag away from its default
-    - When User cancels the Reset all confirmation
-      - Then the flag keeps the user's setting
-- 0006.3
-  - Given User set two flags away from their defaults
-    - When User confirms Reset all
-      - Then every flag shows its default
-- 0006.4
-  - Given Tester launches with a flag's launch argument on
-    - When User confirms Reset all
-      - Then that flag stays on, from the launch argument
-- 0006.5
-  - Given User saved a setting for a flag this build doesn't ship
-    - When User confirms Reset all
-      - Then that saved setting stays
+1. Types a number
+   1. GIVEN User opens the debug screen
+      1. WHEN User types a new number for a number flag
+         1. THEN the row shows that number
+         2. THEN from the user's setting
+2. Cancels Reset all
+   1. GIVEN User set a flag away from its default
+      1. WHEN User cancels the Reset all confirmation
+         1. THEN the flag keeps the user's setting
+3. Resets every flag
+   1. GIVEN User set two flags away from their defaults
+      1. WHEN User confirms Reset all
+         1. THEN every flag shows its default
+4. Keeps a forced flag
+   1. GIVEN Tester launches with a flag's launch argument on
+      1. WHEN User confirms Reset all
+         1. THEN that flag stays on
+         2. THEN from the launch argument
+5. Keeps an unshipped setting
+   1. GIVEN User saved a setting for a flag this build doesn't ship
+      1. WHEN User confirms Reset all
+         1. THEN that saved setting stays

@@ -14,23 +14,28 @@ value types the kit ships
 
 ## Requirements
 
-- 0015.1
-  - Given User opens the debug screen
-    - When User picks another choice for a choice flag
-      - Then the row shows that choice, from the user's setting
-- 0015.2
-  - Given User opens the debug screen
-    - When User types a decimal for a decimal flag
-      - Then the row shows that number, from the user's setting
-- 0015.3
-  - Given User opens the debug screen
-    - When User types text for a text flag
-      - Then the row shows that text, from the user's setting
-- 0015.4
-  - Given Tester launches with a decimal flag's launch argument
-    - When the debug screen shows that flag's row
-      - Then the field is disabled, with the reason beside it
-- 0015.5
-  - Given Developer lists a choice flag with eight choices
-    - When User picks the last choice on the debug screen
-      - Then the row shows that choice, from the user's setting
+1. Picks a choice
+   1. GIVEN User opens the debug screen
+      1. WHEN User picks another choice for a choice flag
+         1. THEN the row shows that choice
+         2. THEN from the user's setting
+2. Types a decimal
+   1. GIVEN User opens the debug screen
+      1. WHEN User types a decimal for a decimal flag
+         1. THEN the row shows that number
+         2. THEN from the user's setting
+3. Types text
+   1. GIVEN User opens the debug screen
+      1. WHEN User types text for a text flag
+         1. THEN the row shows that text
+         2. THEN from the user's setting
+4. Disables a forced decimal
+   1. GIVEN Tester launches with a decimal flag's launch argument
+      1. WHEN the debug screen shows that flag's row
+         1. THEN the field is disabled
+         2. THEN with the reason beside it
+5. Picks the last of many
+   1. GIVEN Developer lists a choice flag with eight choices
+      1. WHEN User picks the last choice on the debug screen
+         1. THEN the row shows that choice
+         2. THEN from the user's setting

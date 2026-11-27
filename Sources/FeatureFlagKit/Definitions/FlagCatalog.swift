@@ -20,6 +20,14 @@ public struct FlagCatalog: Sendable, RandomAccessCollection {
         filter { $0.expires.isPassed(asOf: date) }
     }
 
+    /// The flags whose expiry day comes within `days` days of `date`, in catalog order.
+    /// It leaves out a flag already past its day and a setting without one.
+    public func expiring(within days: Int, asOf date: Date = .now) -> [any AnyFlag] {
+        filter { flag in
+            flag.expires.daysLeft(within: days, asOf: date) != nil
+        }
+    }
+
     /// Every flag with each listed child moved right under its parent, as a debug screen shows
     /// them. A child whose parent the catalog doesn't list stays where the app put it.
     public var grouped: [(flag: any AnyFlag, isChild: Bool)] {
@@ -38,5 +46,29 @@ public struct FlagCatalog: Sendable, RandomAccessCollection {
             [(flag: flag, isChild: false)]
                 + (children[flag.settingsKey] ?? []).map { (flag: $0, isChild: true) }
         }
+    }
+
+    /// The grouped flags whose title or name holds `query` in any case, each matching child
+    /// still under its parent's row. Spaces around it are dropped, and a blank one keeps all.
+    public func grouped(matching query: String) -> [(flag: any AnyFlag, isChild: Bool)] {
+        let rows = grouped
+        let query = query.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return rows }
+        let matches = rows.map { row in
+            [row.flag.title, row.flag.name].contains {
+                $0.range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+            }
+        }
+        // A parent stays for a matching child, which always follows it in `grouped`.
+        var keeps = matches
+        var parent: Int?
+        for (index, row) in rows.enumerated() {
+            if !row.isChild {
+                parent = index
+            } else if matches[index], let parent {
+                keeps[parent] = true
+            }
+        }
+        return rows.indices.filter { keeps[$0] }.map { rows[$0] }
     }
 }

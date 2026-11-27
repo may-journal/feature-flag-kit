@@ -82,13 +82,20 @@ enum FlagDebugStory {
         }
     }
 
-    /// The debug screen on `store` and `catalog`, in the system's scheme.
+    /// The debug screen on `store` and `catalog`, in the system's scheme, with `query` typed
+    /// in its search field, opened on `today`.
     @MainActor
     static func debug(
-        _ store: FlagStore, catalog: FlagCatalog = catalog, confirmsReset: Bool = false
+        _ store: FlagStore, catalog: FlagCatalog = catalog, confirmsReset: Bool = false,
+        query: String = "", today: Date? = nil
     ) -> some View {
-        FlagDebugView(catalog: catalog, confirmsReset: confirmsReset)
+        FlagDebugView(catalog: catalog, confirmsReset: confirmsReset, query: query, today: today)
             .environment(\.flagStore, store)
+    }
+
+    /// Noon UTC `days` before Replay's expiry day of 1 March 2027.
+    static func before(replaysDay days: Int) -> Date {
+        Date(timeIntervalSince1970: 1_803_859_200 - TimeInterval(days * 86_400) + 43_200)
     }
 
     /// A screen that reads `flag` with `@FlagState` on `store`, under what the launch carried.

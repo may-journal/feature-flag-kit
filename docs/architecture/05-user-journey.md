@@ -36,11 +36,11 @@ flowchart TB
     toggle(4 Turn the flag on in Settings<br/>Req 0001):::action
     tester((5 Tester)):::persona
     launch(6 Launch with an override<br/>Req 0002 Req 0007):::action
-    resolve[(7 Store resolves the flag<br/>Req 0001 Req 0002)]:::system
+    resolve[(7 Store resolves the flag<br/>Req 0001 Req 0002 Req 0016 Req 0018)]:::system
     feature[8 Feature shows or hides<br/>Req 0001 Req 0002]:::screen
-    expiry[(9 Catalog tests name stale and colliding flags<br/>Req 0003 Req 0014)]:::system
+    expiry[(9 Catalog tests name stale, nearly stale and colliding flags<br/>Req 0003 Req 0014 Req 0020)]:::system
     view[10 View reads the flag with @FlagState<br/>Req 0004]:::screen
-    debug[11 Debug screen lists every flag and its layer<br/>Req 0005 Req 0006 Req 0015]:::screen
+    debug[11 Debug screen lists every flag and its layer<br/>Req 0005 Req 0006 Req 0015 Req 0017 Req 0019]:::screen
     choose(12 Pick a choice for a setting<br/>Req 0008):::action
     sync[(13 Sync hook hears the user's changes and imports values<br/>Req 0009)]:::system
     group(14 Turn off a parent toggle<br/>Req 0010):::action
@@ -84,11 +84,11 @@ Numbers match the callout table.
 | 4   | Flips the flag's toggle. | Action | The user's choice is saved. |
 | 5   | The person testing the app. | Persona | Same person as the system context. |
 | 6   | Passes a launch argument or environment variable, by hand or from `FlagLaunch`. | Action | A run forces a flag without a rebuild. |
-| 7   | Checks the flag ships in this build, then takes the launch argument, variable, toggle and defaults. | System | Precedence lives in one place. |
+| 7   | Checks the flag's parent is on and the flag ships in this build, then takes the launch argument, variable, toggle and defaults. | System | Precedence lives in one place. |
 | 8   | The flagged feature appears only when the flag is on. | Screen | What the user came to see. |
-| 9   | Lists the flags past their expiry day, never a setting without one, and the flags that collide. | System | The app's tests fail until they go. |
+| 9   | Lists the flags past or near their expiry day, never a setting without one, and the flags that collide. | System | The app's tests fail until they go. |
 | 10  | The view redraws when the flag's toggle changes. | Screen | A toggle shows at once. |
-| 11  | Shows each flag's value, layer and expiry day, with toggles, fields, choice buttons and a confirmed "Reset all". | Screen | The user sees why a flag is on. |
+| 11  | Shows each flag's value, layer and expiry day under a search field, with toggles, fields, choice buttons, "Copy launch arguments" and a confirmed "Reset all". | Screen | The user sees why a flag is on. |
 | 12  | Picks one of a setting's choices, an enum with a `String` raw value. | Action | A setting needs no code per choice. |
 | 13  | Reports each change to the user's layer with its writer, and writes imported values as imports. | System | An app syncs settings without sending imports back. |
 | 14  | Turns off a parent, which turns its children off and keeps their own settings. | Action | One switch covers a group and loses no choice. |

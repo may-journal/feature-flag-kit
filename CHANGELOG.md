@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.2](https://github.com/may-journal/feature-flag-kit/compare/v1.7.1...v1.7.2) (2026-11-27)
+
+
+### Bug Fixes
+
+* **docs:** requirement docs pass the newest Gherkin rules ([#63](https://github.com/may-journal/feature-flag-kit/issues/63)) ([f558650](https://github.com/may-journal/feature-flag-kit/commit/f558650e2d794002f4d09a750b1ba71bcf513395))
+
 ## [1.7.1](https://github.com/may-journal/feature-flag-kit/compare/v1.7.0...v1.7.1) (2026-11-26)
 
 

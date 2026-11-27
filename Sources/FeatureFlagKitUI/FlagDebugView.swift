@@ -1,8 +1,8 @@
 import FeatureFlagKit
 import SwiftUI
 
-/// Names the build's environment, then lists each flag it ships with its value, layer and expiry
-/// day, plus "Reset all". The app opens it however it likes, such as from a hidden gesture.
+/// Names the build's environment, then lists each flag it ships with its value and layer.
+/// "Copy launch arguments" and "Reset all" follow, and the app opens the screen however it likes.
 public struct FlagDebugView: View {
     private let catalog: FlagCatalog
     /// The environment's store, watched so any flag's change redraws the screen.
@@ -32,6 +32,7 @@ public struct FlagDebugView: View {
                 own: debuggable?.ownOrigin(in: store)
             )
         }
+        let rejected = store.rejectedOverrides(in: catalog)
         Form {
             Section {
                 Text(FlagText.environment(of: store))
@@ -40,10 +41,12 @@ public struct FlagDebugView: View {
                 ForEach(rows, id: \.flag.settingsKey) { row in
                     FlagDebugRow(
                         flag: row.flag, store: store, shown: row.shown, own: row.own,
-                        isChild: row.isChild)
+                        isChild: row.isChild,
+                        rejected: rejected.filter { $0.name == row.flag.name }.map(\.description))
                 }
             }
             Section {
+                FlagCopyButton(catalog: catalog, store: store)
                 // The confirmation hangs off the button, so it points at what was tapped.
                 Button(Self.resetAll, role: .destructive) { confirmsReset = true }
                     .confirmationDialog(

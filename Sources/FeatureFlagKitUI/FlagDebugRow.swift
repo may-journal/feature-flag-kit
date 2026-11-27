@@ -94,6 +94,8 @@ struct FlagDebugRow: View {
     var own: FlagOrigin?
     /// Whether the row sits under its parent's row.
     var isChild = false
+    /// The overrides the store could not read for this flag, each said in words.
+    var rejected: [String] = []
 
     var body: some View {
         // An override sits above the control and shows its reason, even under an off parent.
@@ -115,6 +117,7 @@ struct FlagDebugRow: View {
                 Text(FlagText.overridden(by: own))
                     .foregroundStyle(.secondary)
             }
+            ForEach(rejected, id: \.self) { Text($0).foregroundStyle(.secondary) }
         }
         .padding(.leading, isChild ? 20 : 0)
     }

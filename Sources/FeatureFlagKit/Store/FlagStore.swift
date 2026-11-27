@@ -1,7 +1,7 @@
 import Foundation
 
-/// Answers what each flag is and where that came from. Precedence: availability, an off
-/// parent, launch argument, variable, user toggle, environment default, compiled default.
+/// Answers what each flag is and where that came from. Precedence: an off parent,
+/// availability, launch argument, variable, user toggle, environment default, compiled default.
 public struct FlagStore: Sendable {
     /// The sources asked in order; the first that sets a flag wins. In production it holds
     /// only the user's settings, so no launch argument or variable forces a flag.

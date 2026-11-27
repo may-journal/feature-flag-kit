@@ -19,11 +19,7 @@ struct LaunchArgumentSource: FlagSource {
 
     /// The value after the last `-flag.<name>`, as `UserDefaults` reads arguments.
     func value<Value: FlagValue>(for flag: Flag<Value>) -> Value? {
-        let name = FlagEncoding.argument(for: flag.name)
-        guard let index = arguments.lastIndex(of: name), index + 1 < arguments.count else {
-            return nil
-        }
-        return Value(flagText: arguments[index + 1])
+        text(for: flag.name).flatMap(Value.init(flagText:))
     }
 }
 
@@ -37,7 +33,7 @@ struct EnvironmentSource: FlagSource {
     }
 
     func value<Value: FlagValue>(for flag: Flag<Value>) -> Value? {
-        environment[FlagEncoding.environmentVariable(for: flag.name)].flatMap(Value.init(flagText:))
+        text(for: flag.name).flatMap(Value.init(flagText:))
     }
 }
 

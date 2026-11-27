@@ -35,6 +35,7 @@ classDiagram
     class FlagEnvironment["26 FlagEnvironment"]
     class FlagEnvironmentSource["27 FlagEnvironmentSource"]
     class FlagCatalogProblem["28 FlagCatalogProblem"]
+    class FlagRejectedOverride["29 FlagRejectedOverride"]
 
     Flag ..|> AnyFlag : A
     Flag --> FlagExpiry : B
@@ -99,6 +100,8 @@ classDiagram
     FlagOrigin --> FlagEnvironment : III
     FlagCatalog --> FlagCatalogProblem : JJJ
     FlagCatalog --> FlagEncoding : KKK
+    FlagStore --> FlagRejectedOverride : LLL
+    FlagRejectedOverride --> FlagOrigin : MMM
 
     style Flag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style AnyFlag fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -106,6 +109,7 @@ classDiagram
     style FlagExpiry fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagCatalog fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagCatalogProblem fill:#6d28d9,stroke:#4c1d95,color:#ffffff
+    style FlagRejectedOverride fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagEncoding fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagStore fill:#6d28d9,stroke:#4c1d95,color:#ffffff
     style FlagSource fill:#6d28d9,stroke:#4c1d95,color:#ffffff
@@ -154,9 +158,9 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 2   | [`AnyFlag`](../../Sources/FeatureFlagKit/Definitions/Flag.swift) is what every flag states, whatever value it holds. | A catalog lists flags of mixed types. |
 | 3   | [`FlagValue`](../../Sources/FeatureFlagKit/Definitions/FlagValue.swift) is a type a flag holds: `Bool`, `Int`, `Double`, `String` or an enum with a `String` raw value. | Overrides arrive as text and toggles as stored values. |
 | 4   | [`FlagExpiry`](../../Sources/FeatureFlagKit/Definitions/FlagExpiry.swift) is the day a flag should be gone, from its start in UTC, or `never`. | Every machine agrees on the day. |
-| 5   | [`FlagCatalog`](../../Sources/FeatureFlagKit/Definitions/FlagCatalog.swift) is the app's list of flags, with `expired(asOf:)` and `grouped`, each child under its parent. | An app test fails once a flag outstays its day. |
+| 5   | [`FlagCatalog`](../../Sources/FeatureFlagKit/Definitions/FlagCatalog.swift) is the app's list of flags, with `expired(asOf:)` and `grouped`, each child under its parent, and `grouped(matching:)` for a search. | An app test fails once a flag outstays its day. |
 | 6   | [`FlagEncoding`](../../Sources/FeatureFlagKit/Definitions/FlagEncoding.swift) spells `-flag.<name>`, `FLAG_<NAME>` and `flag.<name>`. | Every target reads one encoding. |
-| 7   | [`FlagStore`](../../Sources/FeatureFlagKit/Store/FlagStore.swift) resolves a flag through its environment, its parent, its sources, then the defaults, streams changes and imports the user's values. | Precedence lives in one place. |
+| 7   | [`FlagStore`](../../Sources/FeatureFlagKit/Store/FlagStore.swift) resolves a flag through its parent, its environment, its sources, then the defaults, streams changes and imports the user's values. | Precedence lives in one place. |
 | 8   | [`FlagSource`](../../Sources/FeatureFlagKit/Store/FlagSource.swift) is one place a value comes from: launch arguments, environment or settings. | A later source can join without changing the store. |
 | 9   | [`FlagSettings`](../../Sources/FeatureFlagKit/Store/FlagSettings.swift) is the small key-value protocol that `UserDefaults` conforms to. | A test swaps memory in for the app's settings. |
 | 10  | [`FlagOrigin`](../../Sources/FeatureFlagKit/Store/FlagOrigin.swift) names where a value came from. | A debug screen can say why a flag is on. |
@@ -165,7 +169,7 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 13  | [`flagStore`](../../Sources/FeatureFlagKitUI/FlagStoreEnvironment.swift) is the environment's store, `FlagStore.live()` by default. | A preview or test swaps in its own store. |
 | 14  | [`FlagState`](../../Sources/FeatureFlagKitUI/FlagState.swift) is the `@FlagState` property wrapper, with `$binding` for the user's toggle and `isAvailable` for the build. | A view reads a flag in one line. |
 | 15  | [`FlagWatcher`](../../Sources/FeatureFlagKitUI/FlagWatcher.swift) counts the store's changes through one callback, with no task waiting between them. | A view that reads the count redraws on each change, and a gesture or scroll beside it is never held up. |
-| 16  | [`FlagDebugView`](../../Sources/FeatureFlagKitUI/FlagDebugView.swift) names the environment and lists the catalog's flags this build ships, with "Reset all" behind a confirmation. | One screen says why each flag is on, and a slip clears nothing. |
+| 16  | [`FlagDebugView`](../../Sources/FeatureFlagKitUI/FlagDebugView.swift) names the environment and lists the catalog's flags this build ships, narrowed by a search, with "Reset all" behind a confirmation. | One screen says why each flag is on, and a slip clears nothing. |
 | 17  | [`FlagDebugRow`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) shows a flag's value, layer and expiry day, and its toggle, field or choice buttons. | An override disables the control and says why. |
 | 18  | [`DebuggableFlag`](../../Sources/FeatureFlagKitUI/FlagDebugRow.swift) reads any `Flag` without its value type. | A catalog holds flags of mixed types. |
 | 19  | [`WatchedFlagStore`](../../Sources/FeatureFlagKitUI/FlagWatcher.swift) is the environment's store, watched from `update()`. | No view starts a listener while it draws. |
@@ -178,6 +182,7 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | 26  | [`FlagEnvironment`](../../Sources/FeatureFlagKit/Definitions/FlagEnvironment.swift) is who a build is for: debug, internal or production, read from the `FeatureFlagEnvironment` Info.plist key. | The system can't tell TestFlight apart reliably, so the app says. |
 | 27  | [`FlagEnvironmentSource`](../../Sources/FeatureFlagKit/Definitions/FlagEnvironment.swift) is where the environment came from: Info.plist, a Debug or release build, or the app. | The debug screen says why the build is what it is. |
 | 28  | [`FlagCatalogProblem`](../../Sources/FeatureFlagKit/Definitions/FlagCatalogProblem.swift) is one collision `FlagCatalog.problems()` names, such as two flags under one settings key. | An app test fails before two flags share a toggle. |
+| 29  | [`FlagRejectedOverride`](../../Sources/FeatureFlagKit/Store/FlagRejectedOverride.swift) is one override whose text does not read as its flag's type. | A tester sees the typo. |
 | A   | `Flag` conforms to `AnyFlag`. | The catalog holds any flag. |
 | B   | `Flag` carries its expiry day, `never` for a setting. | Expiry is part of the definition. |
 | C   | `Flag` asks `FlagEncoding` for its default settings key. | One encoding for all keys. |
@@ -241,6 +246,8 @@ Numbers on classes and letters on relationships match the callout table. See [02
 | III | `FlagOrigin` names the environment a flag is missing from, or whose default it read. | A debug screen says why. |
 | JJJ | `FlagCatalog` names each collision among its flags as a `FlagCatalogProblem`. | One test lists every collision. |
 | KKK | `FlagCatalog` asks `FlagEncoding` for each flag's environment variable. | Two names that spell one variable are found. |
+| LLL | `FlagStore` lists the overrides it could not read as `FlagRejectedOverride`. | The next layer no longer answers in silence. |
+| MMM | `FlagRejectedOverride` names its layer with a `FlagOrigin`. | The debug screen says which layer was mistyped. |
 ## Platforms
 
 iOS 26 and macOS 26 and later, built with Swift tools 6.2 in the Swift 6 language mode.

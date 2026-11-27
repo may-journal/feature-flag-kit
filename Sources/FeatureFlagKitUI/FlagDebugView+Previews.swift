@@ -82,12 +82,14 @@ enum FlagDebugStory {
         }
     }
 
-    /// The debug screen on `store` and `catalog`, in the system's scheme.
+    /// The debug screen on `store` and `catalog`, in the system's scheme, with `query` typed
+    /// in its search field.
     @MainActor
     static func debug(
-        _ store: FlagStore, catalog: FlagCatalog = catalog, confirmsReset: Bool = false
+        _ store: FlagStore, catalog: FlagCatalog = catalog, confirmsReset: Bool = false,
+        query: String = ""
     ) -> some View {
-        FlagDebugView(catalog: catalog, confirmsReset: confirmsReset)
+        FlagDebugView(catalog: catalog, confirmsReset: confirmsReset, query: query)
             .environment(\.flagStore, store)
     }
 

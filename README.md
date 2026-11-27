@@ -97,15 +97,15 @@ A toggle set to the default, or to nil, removes its key, so it follows a later r
 
 `resolve(_:)` returns the value and where it came from. The store asks, in order:
 
-1. Whether the flag ships in this environment; if not, it reads the compiled default.
 1. Whether its parent is off or missing from this environment; if so, it reads off.
+1. Whether the flag ships in this environment; if not, it reads the compiled default.
 1. A launch argument, `-flag.onThisDay YES`, outside production.
 1. An environment variable, `FLAG_ON_THIS_DAY=YES`, outside production.
 1. The user's setting.
 1. The flag's default for this environment.
 1. The compiled default.
 
-`FlagEncoding` spells each name. Bool flags read `YES`, `NO`, `true`, `false`, `1` and `0`. A value is written as its `flagText`, its description unless its type sets one that reads back.
+An override whose text does not read as the flag's type is skipped, and `rejectedOverrides(in:)` and the debug screen name it. `FlagEncoding` spells each name. Bool flags read `YES`, `NO`, `true`, `false`, `1` and `0`. A value is written as its `flagText`, its description unless its type sets one that reads back.
 
 ## Sync the user's settings
 
@@ -201,6 +201,18 @@ var body: some View {
 }
 ```
 
+### Search the flags
+
+The system's search field, "Search", keeps the rows whose title or name holds the text in any case. A matching child keeps its parent's row above it. With no match the list says "No flags match", and "Reset all" still covers every flag. `FlagCatalog.grouped(matching:)` returns the same rows in code.
+
+### Catalog problems
+
+When `FlagCatalog.problems()` names any collision, a "Catalog problems" section sits above the flags. Each problem is one warning line, in the words the catalog's test prints. Two flags under one settings key still get a row each, so the tester sees both move together.
+
+### Copy the flags
+
+"Copy launch arguments" copies each flag that differs from its compiled default as one line, such as `-flag.gridColumns 5`. A developer pastes it into a scheme to start with the tester's flags. `FlagStore.launchArguments(for:)` returns the same arguments in code.
+
 ## Storybook
 
 Every acceptance in [docs/requirements](docs/requirements/) has a `#Preview` page named by its ID. The debug screen's pages are in [FlagDebugView+Previews.swift](Sources/FeatureFlagKitUI/FlagDebugView+Previews.swift), in light and dark, and the rest are in [Stories](Sources/FeatureFlagKitUI/Stories/). The previews compile only in Debug builds, and only the demo app in [Examples/FlagDebugDemo](Examples/FlagDebugDemo/) links [StorybookKit](https://github.com/eure/swift-storybook), which lists them.
@@ -249,6 +261,18 @@ Add one test so a flag cannot outstay its expiry day, and another so no two flag
 
 @Test func noFlagsCollide() {
     #expect(AppFlags.catalog.problems().map(\.description) == [])
+}
+```
+
+### Warn before a flag expires
+
+`expiring(within:)` names each flag whose day comes within that many UTC days, so a test warns without failing. The debug screen counts down the last 30 days on the row, such as "Expires 2027-03-01, in 12 days":
+
+```swift
+@Test func flagsNearTheirDay() {
+    withKnownIssue(isIntermittent: true) {
+        #expect(AppFlags.catalog.expiring(within: 14).map(\.name) == [])
+    }
 }
 ```
 

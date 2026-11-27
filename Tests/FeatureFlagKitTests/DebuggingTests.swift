@@ -71,6 +71,8 @@ extension FeatureFlagKitTests {
             let (screen, user) = try render(.isolated(), catalog: catalog)
             try await user.sees(.text("Legacy banner"))
             try await user.sees(.text("Value unknown, not a Flag"))
+            let spoken = await user.reads().map(\.spoken)
+            #expect(spoken.filter { $0.contains("Legacy banner") }.count == 1)
             try screen.close()
         }
 

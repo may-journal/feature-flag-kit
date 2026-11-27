@@ -87,6 +87,8 @@ extension FeatureFlagKitTests {
             }
             try await User(screen).taps(.role(.toggle, "Suggest for days"))
             let first = await firstChange(of: changes)
+            #expect(first?.key == "flag.daySuggestions")
+            #expect(first?.rawValue == .bool(false))
             #expect(
                 first
                     == FlagChange(

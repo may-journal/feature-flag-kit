@@ -23,7 +23,8 @@ flag reads with an override
       1. WHEN the app shows its screen
          1. THEN the flagged feature stays hidden
 3. Argument beats variable
-   1. GIVEN Tester sets the launch argument off and the environment variable on
+   1. GIVEN Tester sets the launch argument off
+   2. GIVEN Tester sets the environment variable on
       1. WHEN the app shows its screen
          1. THEN the launch argument wins
 4. Source names the argument
@@ -31,7 +32,8 @@ flag reads with an override
       1. WHEN the app asks where the flag's value came from
          1. THEN it answers the launch argument
 5. Mistyped argument falls through
-   1. GIVEN Tester mistypes the launch argument and sets the environment variable off
+   1. GIVEN Tester mistypes the launch argument
+   2. GIVEN Tester sets the environment variable off
       1. WHEN the app shows its screen
          1. THEN the environment variable decides
 6. Mistyped variable falls through

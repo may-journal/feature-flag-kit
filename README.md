@@ -97,8 +97,8 @@ A toggle set to the default, or to nil, removes its key, so it follows a later r
 
 `resolve(_:)` returns the value and where it came from. The store asks, in order:
 
-1. Whether the flag ships in this environment; if not, it reads the compiled default.
 1. Whether its parent is off or missing from this environment; if so, it reads off.
+1. Whether the flag ships in this environment; if not, it reads the compiled default.
 1. A launch argument, `-flag.onThisDay YES`, outside production.
 1. An environment variable, `FLAG_ON_THIS_DAY=YES`, outside production.
 1. The user's setting.
@@ -200,6 +200,10 @@ var body: some View {
         }
 }
 ```
+
+### Copy the flags
+
+"Copy launch arguments" copies each flag that differs from its compiled default as one line, such as `-flag.gridColumns 5`. A developer pastes it into a scheme to start with the tester's flags. `FlagStore.launchArguments(for:)` returns the same arguments in code.
 
 ## Storybook
 

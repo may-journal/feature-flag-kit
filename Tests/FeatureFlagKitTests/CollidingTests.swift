@@ -24,6 +24,9 @@ extension FeatureFlagKitTests {
             let rewind = Flag(
                 "rewind", default: false, title: "Rewind", legacySettingsKey: "flag.gridColumns")
             let catalog = FlagCatalog([ExampleFlags.gridColumns, rewind])
+            let problem = catalog.problems().first
+            #expect(problem?.flags == ["gridColumns", "rewind"])
+            #expect(problem?.subject == "flag.gridColumns")
             #expect(
                 catalog.problems().map(\.description) == [
                     "Flags \"gridColumns\" and \"rewind\" share the settings key flag.gridColumns"
@@ -35,6 +38,9 @@ extension FeatureFlagKitTests {
                 Flag("showHTMLView", default: false, title: "Show HTML view"),
                 Flag("showHtmlView", default: false, title: "Show web view"),
             ])
+            let problem = catalog.problems().first
+            #expect(problem?.flags == ["showHTMLView", "showHtmlView"])
+            #expect(problem?.subject == "FLAG_SHOW_HTML_VIEW")
             #expect(
                 catalog.problems().map(\.description) == [
                     "Flags \"showHTMLView\" and \"showHtmlView\" share the environment variable "
@@ -44,6 +50,9 @@ extension FeatureFlagKitTests {
 
         @Test func test0014_4() {
             let catalog = FlagCatalog([ExampleFlags.gridColumns, ExampleFlags.daySuggestions])
+            let problem = catalog.problems().first
+            #expect(problem?.flags == ["daySuggestions"])
+            #expect(problem?.subject == "suggestions")
             #expect(
                 catalog.problems().map(\.description) == [
                     "Flag \"daySuggestions\" sits under \"suggestions\", "

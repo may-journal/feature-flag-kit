@@ -45,7 +45,8 @@ flags in the app's catalog
 7. Shows an unknown type
    1. GIVEN Developer lists a flag of their own type in the catalog
       1. WHEN User opens the debug screen
-         1. THEN its row shows the title and says the value is unknown
+         1. THEN its row shows the title
+         2. THEN its row says the value is unknown
 8. Disables a forced number
    1. GIVEN Tester launches with a number flag's launch argument
       1. WHEN User opens the debug screen

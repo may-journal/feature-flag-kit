@@ -33,6 +33,7 @@ extension FeatureFlagKitTests {
             let launched = store(
                 arguments: ["-flag.onThisDay", "NO"], environment: ["FLAG_ON_THIS_DAY": "YES"])
             try await expectOnThisDay(shown: false, on: launched)
+            #expect(launched.resolve(flag).origin == .launchArgument)
         }
 
         @Test func test0002_4() {

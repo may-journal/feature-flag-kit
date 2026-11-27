@@ -28,6 +28,8 @@ extension FeatureFlagKitTests {
                 arguments: FlagEncoding.arguments(flag, true),
                 environment: FlagEncoding.environment(flag, true), in: .production)
             #expect(!store[flag])
+            #expect(store.resolve(flag).origin != .launchArgument)
+            #expect(store.resolve(flag).origin != .environment)
         }
 
         @Test func test0012_4() {

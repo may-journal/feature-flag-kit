@@ -21,15 +21,19 @@ kinds of collision a catalog can hold
 2. Names a legacy key clash
    1. GIVEN Developer gives a flag a legacy key that is another flag's key
       1. WHEN the catalog test runs
-         1. THEN it names both flags and the key
+         1. THEN it names both flags
+         2. THEN it names the key
 3. Names a variable clash
    1. GIVEN Developer lists two names that spell one environment variable
       1. WHEN the catalog test runs
-         1. THEN it names both flags and the variable
+         1. THEN it names both flags
+         2. THEN it names the variable
 4. Names a missing parent
-   1. GIVEN Developer lists a child and leaves out its parent
+   1. GIVEN Developer lists a child
+   2. GIVEN Developer leaves out its parent
       1. WHEN the catalog test runs
-         1. THEN it names the child and the parent
+         1. THEN it names the child
+         2. THEN it names the parent
 5. Passes a clean catalog
    1. GIVEN Developer lists flags that share nothing
       1. WHEN the catalog test runs

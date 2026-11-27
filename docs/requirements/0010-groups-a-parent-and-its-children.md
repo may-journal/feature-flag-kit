@@ -20,7 +20,7 @@ child flags
          1. THEN the child reads off
 2. Child keeps its choice
    1. GIVEN User turned a child off
-      1. WHEN User turns its parent off and back on
+      1. WHEN User cycles its parent
          1. THEN the child is still off
 3. Argument beats parent
    1. GIVEN Tester launches with a child's launch argument off
@@ -49,4 +49,5 @@ child flags
    1. GIVEN Developer listens for changes to the user's settings
    2. GIVEN with the parent off
       1. WHEN User flips a child
-         1. THEN the listener hears the child's own key and value
+         1. THEN the listener hears the child's own key
+         2. THEN the listener hears the child's value
